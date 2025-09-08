@@ -1,0 +1,69 @@
+# Keywords to search for in the generated keys.
+#
+# The search is case-insensitive. You can specify multiple keywords.
+# If multiple keywords are specified, the matching behavior is controlled
+# by the `search.matching` section.
+#
+# Must be non-empty.
+keywords:
+  - example
+  - meow
+
+search:
+  # The fields to search within each generated key.
+  #
+  # Possible fields:
+  # - public-key
+  # - private-key
+  # - sha1-fingerprint
+  # - sha256-fingerprint
+  # - sha384-fingerprint
+  # - sha512-fingerprint
+  #
+  # Default:
+  # - public-key
+  # - sha256-fingerprint
+  fields:
+    - public-key
+    - private-key
+    - sha1-fingerprint
+    - sha256-fingerprint
+    - sha384-fingerprint
+    - sha512-fingerprint
+
+  # Matching behavior when multiple keywords and/or fields are specified.
+  matching:
+    # If true, all keywords must be present in a single field to count as a match.
+    # If false, any keyword present in any field counts as a match.
+    #
+    # Default: `false`
+    all-keywords: false
+    # If true, all specified fields must contain at least one keyword to count as a match.
+    # If false, any field containing at least one keyword counts as a match.
+    #
+    # Default: `false`
+    all-fields: true
+
+runtime:
+  # Number of threads to use for key generation.
+  #
+  # Default: number of CPU cores.
+  threads: 16
+  # Prevent the system from sleeping while shgen is running.
+  #
+  # Default: `true`
+  keep_awake: true
+  # Set CPU affinity for the key generation threads.
+  # This can improve performance on multi-core systems.
+  #
+  # Default: `true`
+  set_affinity: true
+  # TODO: Add `use-physical-cores` option to use only physical cores.
+  # TODO: Add `process-priority` option to set process priority.
+
+output:
+  # Folder to save found keys to.
+  #
+  # Default: `found-keys`
+  save-to: found-keys
+
