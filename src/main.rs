@@ -51,7 +51,7 @@ fn main() {
                         eprintln!("Failed to set core affinity for thread {thread_id}");
                     }
 
-                    worker(matcher)
+                    worker(&matcher);
                 })
                 .expect("failed to spawn worker thread"),
         );
@@ -74,7 +74,7 @@ fn main() {
     }
 }
 
-fn worker(matcher: Matcher) {
+fn worker(matcher: &Matcher) {
     let mut thread_rng = rand::rng();
     // https://eprint.iacr.org/2019/1492.pdf Section 5.3
     let mut chacha8_rng = ChaCha8Rng::from_rng(&mut thread_rng);

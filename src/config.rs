@@ -42,7 +42,7 @@ impl Config {
              Threads: {}\n\
              Keep awake: {}\n\
              Set affinity: {}\n\
-             Save folder: {:?}\n",
+             Save folder: {}\n",
             self.keywords,
             self.search
                 .fields
@@ -166,7 +166,7 @@ impl OutputConfig {
                 .expect("failed to set permissions for public key");
         }
 
-        println!("Saved keys to {save_dir:?}");
+        println!("Saved keys to {}", save_dir.display());
     }
 
     pub fn default() -> Self {

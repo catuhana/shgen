@@ -114,13 +114,13 @@ impl<'a> OpenSSHFormatter<'a> {
         private_key
     }
 
-    pub fn format_fingerprint(&self, fingerprint: Fingerprint) -> String {
+    pub fn format_fingerprint(&self, fingerprint: &Fingerprint) -> String {
         let public_key_blob = self.generate_public_key_blob();
         match fingerprint {
-            Fingerprint::Sha1 => self.base64_engine.encode(Sha1::digest(&public_key_blob)),
-            Fingerprint::Sha256 => self.base64_engine.encode(Sha256::digest(&public_key_blob)),
-            Fingerprint::Sha384 => self.base64_engine.encode(Sha384::digest(&public_key_blob)),
-            Fingerprint::Sha512 => self.base64_engine.encode(Sha512::digest(&public_key_blob)),
+            Fingerprint::Sha1 => self.base64_engine.encode(Sha1::digest(public_key_blob)),
+            Fingerprint::Sha256 => self.base64_engine.encode(Sha256::digest(public_key_blob)),
+            Fingerprint::Sha384 => self.base64_engine.encode(Sha384::digest(public_key_blob)),
+            Fingerprint::Sha512 => self.base64_engine.encode(Sha512::digest(public_key_blob)),
         }
     }
 

@@ -75,7 +75,7 @@ impl Matcher {
                     _ => unreachable!(),
                 };
 
-                let fingerprint = openssh_formatter.format_fingerprint(fingerprint_type);
+                let fingerprint = openssh_formatter.format_fingerprint(&fingerprint_type);
                 self.matches_aho_corasick(&fingerprint)
             }
         }
