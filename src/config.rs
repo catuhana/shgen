@@ -54,7 +54,7 @@ impl Config {
             self.runtime.threads,
             self.runtime.keep_awake,
             self.runtime.set_affinity,
-            self.output.save_to.to_string_lossy()
+            self.output.save_to.display()
         )
     }
 }
