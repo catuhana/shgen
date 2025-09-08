@@ -22,3 +22,8 @@ impl KeepAwake {
 mod windows;
 #[cfg(target_os = "windows")]
 use windows::KeepAwake as PlatformKeepAwake;
+
+#[cfg(not(target_os = "windows"))]
+mod noop;
+#[cfg(not(target_os = "windows"))]
+use noop::KeepAwake as PlatformKeepAwake;
