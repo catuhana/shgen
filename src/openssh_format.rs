@@ -66,7 +66,7 @@ impl<'a> OpenSSHFormatter<'a> {
         }
     }
 
-    pub fn format_public_key(&self) -> String {
+    pub fn format_public_key(&self) -> OpenSSHPublicKey {
         const OPENSSH_PUBLIC_KEY_LENGTH: usize = SSH_KEY_ALGORITHM_NAME.len() // Algorithm name length
             + 1 // Space (1 byte)
             + base64::encoded_len(PUBLIC_KEY_BLOB_SIZE, false).unwrap(); // Base64 encoded public key blob length
@@ -81,7 +81,7 @@ impl<'a> OpenSSHFormatter<'a> {
         public_key
     }
 
-    pub fn format_private_key(&mut self) -> String {
+    pub fn format_private_key(&mut self) -> OpenSSHPrivateKey {
         const PRIVATE_KEY_HEADER: &str = "-----BEGIN OPENSSH PRIVATE KEY-----\n";
         const PRIVATE_KEY_FOOTER: &str = "-----END OPENSSH PRIVATE KEY-----\n";
 
