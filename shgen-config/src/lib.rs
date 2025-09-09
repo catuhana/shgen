@@ -23,18 +23,20 @@ pub struct Config {
 
 impl Config {
     pub fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>> {
-        let figment = Figment::new();
-
-        // TODO: Do not merge when file does not exist
-        let figment = if let Some(path) = config_path {
-            figment.merge(Yaml::file(path))
-        } else {
-            figment
-                .merge(Yaml::file("config.yaml"))
-                .merge(Yaml::file("config.yml"))
-        };
-
-        figment.extract().map_err(Into::into)
+        Figment::new()
+            .merge(if let Some(path) = config_path {
+                Yaml::file(path)
+            } else if std::fs::exists("config.yaml").is_ok_and(|exists| exists) {
+                Yaml::file("config.yaml")
+            } else if std::fs::exists("config.yml").is_ok_and(|exists| exists) {
+                Yaml::file("config.yml")
+            } else {
+                return Err(Box::new(figment::Error::from(
+                    "No configuration file found, tried config.yaml and config.yml",
+                )));
+            })
+            .extract()
+            .map_err(Into::into)
     }
 
     pub fn generate_config_overview(&self) -> String {
