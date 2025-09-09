@@ -39,6 +39,7 @@ impl Config {
             .map_err(Into::into)
     }
 
+    #[must_use]
     pub fn generate_config_overview(&self) -> String {
         format!(
             "Keywords:\n  {:?}\n\

@@ -1,3 +1,5 @@
+#![allow(clippy::cast_precision_loss)]
+
 use std::{
     io::Write,
     path::PathBuf,
@@ -73,16 +75,14 @@ fn main() {
                 let generated_keys = KEYS_COUNTER.load(Ordering::Relaxed);
                 let overall_rate = generated_keys as f64 / elapsed.as_secs_f64();
 
+                let formatted_elapsed = format!(
+                    "{:02}:{:02}:{:02}",
+                    elapsed.as_secs() / 3600,
+                    (elapsed.as_secs() % 3600) / 60,
+                    elapsed.as_secs() % 60
+                );
                 print!(
-                    "\r\x1b[K[{}] {} keys generated @ {:.0} keys/s average",
-                    format!(
-                        "{:02}:{:02}:{:02}",
-                        elapsed.as_secs() / 3600,
-                        (elapsed.as_secs() % 3600) / 60,
-                        elapsed.as_secs() % 60
-                    ),
-                    generated_keys,
-                    overall_rate
+                    "\r\x1b[K[{formatted_elapsed}] {generated_keys} keys generated @ {overall_rate:.0} keys/s average"
                 );
                 let _ = std::io::stdout().flush();
             }
@@ -109,13 +109,13 @@ fn main() {
 }
 
 fn worker(matcher: &Matcher) {
-    let mut thread_rng = rand::rng();
-    // https://eprint.iacr.org/2019/1492.pdf Section 5.3
-    let mut chacha8_rng = ChaCha8Rng::from_rng(&mut thread_rng);
-
     // TODO: Experiment with different batch
     // sizes, maybe even make it configurable.
     const BATCH_SIZE: usize = 8;
+
+    let mut thread_rng = rand::rng();
+    // https://eprint.iacr.org/2019/1492.pdf Section 5.3
+    let mut chacha8_rng = ChaCha8Rng::from_rng(&mut thread_rng);
 
     let mut secret_keys = [0u8; 32 * BATCH_SIZE];
     while !STOP_WORKERS.load(Ordering::Relaxed) {

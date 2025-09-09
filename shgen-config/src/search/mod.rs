@@ -13,7 +13,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             fields: vec![SearchFields::PublicKey, SearchFields::Sha256Fingerprint],
-            matching: Default::default(),
+            matching: matching::Config::default(),
         }
     }
 }
