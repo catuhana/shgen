@@ -79,12 +79,16 @@ fn worker(matcher: &Matcher) {
     // https://eprint.iacr.org/2019/1492.pdf Section 5.3
     let mut chacha8_rng = ChaCha8Rng::from_rng(&mut thread_rng);
 
+    // TODO: Experiment with different batch
+    // sizes, maybe even make it configurable.
     let mut secret_keys = [0u8; 32 * 8];
     while !STOP_WORKERS.load(Ordering::Acquire) {
         chacha8_rng.fill_bytes(&mut secret_keys);
 
-        for secret_key in secret_keys.chunks_exact(32) {
-            let signing_key = SigningKey::from_bytes(secret_key.try_into().unwrap());
+        // There can't be any remainders, so discard it.
+        let (secret_keys_chunks, _) = secret_keys.as_chunks::<32>();
+        for secret_key in secret_keys_chunks {
+            let signing_key = SigningKey::from_bytes(secret_key);
             let mut formatter = OpenSSHFormatter::new(signing_key, &mut thread_rng);
 
             if let Some((public_key, private_key)) = matcher.search_matches(&mut formatter) {
