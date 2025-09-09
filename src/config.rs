@@ -42,7 +42,7 @@ impl Config {
              Threads: {}\n\
              Keep awake: {}\n\
              Set affinity: {}\n\
-             Save folder: {}\n",
+             Save folder: {}",
             self.keywords,
             self.search
                 .fields

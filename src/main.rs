@@ -1,9 +1,11 @@
 use std::{
+    io::Write,
     path::PathBuf,
     sync::{
         OnceLock,
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicU64, Ordering},
     },
+    time::{Duration, Instant},
 };
 
 use core_affinity::{self, CoreId};
@@ -26,6 +28,8 @@ mod openssh_format;
 static ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 static FOUND_KEY: OnceLock<(OpenSSHPublicKey, OpenSSHPrivateKey)> = OnceLock::new();
+
+static KEYS_COUNTER: AtomicU64 = AtomicU64::new(0);
 static STOP_WORKERS: AtomicBool = AtomicBool::new(false);
 
 fn main() {
@@ -57,12 +61,44 @@ fn main() {
         );
     }
 
+    let status_thread = std::thread::Builder::new()
+        .name("status-report".to_string())
+        .spawn(|| {
+            let start_time = Instant::now();
+
+            while !STOP_WORKERS.load(Ordering::Relaxed) {
+                // TODO: Maybe make this configurable
+                std::thread::sleep(Duration::from_secs(2));
+
+                let elapsed = start_time.elapsed();
+
+                let generated_keys = KEYS_COUNTER.load(Ordering::Relaxed);
+                let overall_rate = generated_keys as f64 / elapsed.as_secs_f64();
+
+                print!(
+                    "\r\x1b[K[{}] {} keys generated @ {:.0} keys/s average",
+                    format!(
+                        "{:02}:{:02}:{:02}",
+                        elapsed.as_secs() / 3600,
+                        (elapsed.as_secs() % 3600) / 60,
+                        elapsed.as_secs() % 60
+                    ),
+                    generated_keys,
+                    overall_rate
+                );
+                let _ = std::io::stdout().flush();
+            }
+        })
+        .expect("failed to spawn status thread");
+
     // Kind of hacky I guess?
     if let Some(ref mut keep_awake) = keep_awake {
         keep_awake.prevent_sleep();
     }
 
     println!("{}", config.generate_config_overview());
+
+    status_thread.join().unwrap();
     for handle in worker_handles {
         handle.join().unwrap();
     }
@@ -81,8 +117,10 @@ fn worker(matcher: &Matcher) {
 
     // TODO: Experiment with different batch
     // sizes, maybe even make it configurable.
-    let mut secret_keys = [0u8; 32 * 8];
-    while !STOP_WORKERS.load(Ordering::Acquire) {
+    const BATCH_SIZE: usize = 8;
+
+    let mut secret_keys = [0u8; 32 * BATCH_SIZE];
+    while !STOP_WORKERS.load(Ordering::Relaxed) {
         chacha8_rng.fill_bytes(&mut secret_keys);
 
         // There can't be any remainders, so discard it.
@@ -99,6 +137,8 @@ fn worker(matcher: &Matcher) {
                 return;
             }
         }
+
+        KEYS_COUNTER.fetch_add(BATCH_SIZE as u64, Ordering::Relaxed);
     }
 }
 
