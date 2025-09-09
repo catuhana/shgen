@@ -59,7 +59,6 @@ runtime:
   # Default: `true`
   set_affinity: true
   # TODO: Add `use-physical-cores` option to use only physical cores.
-  # TODO: Add `process-priority` option to set process priority.
 
 output:
   # Folder to save found keys to.
