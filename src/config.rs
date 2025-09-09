@@ -146,26 +146,6 @@ impl OutputConfig {
         std::fs::write(&public_key_path, public_key).expect("failed to write public key");
         std::fs::write(&private_key_path, private_key).expect("failed to write private key");
 
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-
-            let mut public_key_permissions = std::fs::metadata(&public_key_path)
-                .expect("failed to get metadata for public key")
-                .permissions();
-            public_key_permissions.set_mode(0o644);
-
-            let mut private_key_permissions = std::fs::metadata(&private_key_path)
-                .expect("failed to get metadata for private key")
-                .permissions();
-            private_key_permissions.set_mode(0o600);
-
-            std::fs::set_permissions(&public_key_path, public_key_permissions)
-                .expect("failed to set permissions for public key");
-            std::fs::set_permissions(&private_key_path, private_key_permissions)
-                .expect("failed to set permissions for private key");
-        }
-
         println!("Saved keys to {}", save_dir.display());
     }
 
