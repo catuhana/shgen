@@ -10,10 +10,10 @@ use std::{
 
 use shgen_config::Config;
 use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
+use shgen_keep_awake::KeepAwake;
 
 use core_affinity::{self, CoreId};
 use ed25519_dalek::SigningKey;
-use keep_awake::KeepAwake;
 use rand::RngCore;
 use rand_chacha::{ChaCha8Rng, rand_core::SeedableRng};
 

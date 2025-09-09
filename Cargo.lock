@@ -263,13 +263,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 
 [[package]]
-name = "keep-awake"
-version = "0.0.0"
-dependencies = [
- "windows",
-]
-
-[[package]]
 name = "libc"
 version = "0.2.175"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -468,7 +461,6 @@ dependencies = [
  "core_affinity",
  "ed25519-dalek",
  "figment",
- "keep-awake",
  "mimalloc",
  "rand",
  "rand_chacha",
@@ -477,6 +469,7 @@ dependencies = [
  "sha2 0.10.9",
  "shgen-config",
  "shgen-core",
+ "shgen-keep-awake",
 ]
 
 [[package]]
@@ -491,6 +484,13 @@ dependencies = [
 [[package]]
 name = "shgen-core"
 version = "0.0.0"
+
+[[package]]
+name = "shgen-keep-awake"
+version = "0.0.0"
+dependencies = [
+ "windows",
+]
 
 [[package]]
 name = "shlex"
