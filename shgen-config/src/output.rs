@@ -10,6 +10,7 @@ pub struct Config {
     pub save_to: PathBuf,
 }
 
+// TODO: Remove this and move logic to somewhere else.
 impl Config {
     pub fn save_keys(&self, public_key: &OpenSSHPublicKey, private_key: &OpenSSHPrivateKey) {
         let save_dir = &self.save_to;
@@ -24,20 +25,12 @@ impl Config {
 
         println!("Saved keys to {}", save_dir.display());
     }
-
-    pub fn default() -> Self {
-        Self {
-            save_to: Self::default_save_to(),
-        }
-    }
-
-    pub fn default_save_to() -> PathBuf {
-        PathBuf::from("found-keys")
-    }
 }
 
 impl Default for Config {
     fn default() -> Self {
-        Self::default()
+        Self {
+            save_to: PathBuf::from("found-keys"),
+        }
     }
 }

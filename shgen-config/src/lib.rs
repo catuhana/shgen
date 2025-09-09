@@ -25,6 +25,7 @@ impl Config {
     pub fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>> {
         let figment = Figment::new();
 
+        // TODO: Do not merge when file does not exist
         let figment = if let Some(path) = config_path {
             figment.merge(Yaml::file(path))
         } else {
