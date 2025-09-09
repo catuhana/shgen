@@ -1,3 +1,5 @@
+#![allow(clippy::cast_possible_truncation)]
+
 use base64::{
     Engine,
     engine::{GeneralPurpose, general_purpose::STANDARD_NO_PAD},

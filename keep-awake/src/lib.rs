@@ -3,6 +3,7 @@ pub struct KeepAwake {
 }
 
 impl KeepAwake {
+    #[must_use]
     pub fn new(reason: &str) -> Self {
         Self {
             inner: PlatformKeepAwake::new(reason),
