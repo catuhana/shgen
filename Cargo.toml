@@ -1,13 +1,20 @@
 [workspace]
 resolver = "3"
-members = ["keep-awake"]
+members = ["keep-awake", "shgen-config", "shgen-core"]
 
 [package]
 name = "shgen"
 version = "0.0.0"
 edition = "2024"
 
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+
 [dependencies]
+shgen-config = { path = "./shgen-config" }
+shgen-core = { path = "./shgen-core" }
+
 aho-corasick = "1.1.3"
 base64 = "0.22.1"
 core_affinity = "0.8.3"

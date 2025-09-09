@@ -1,18 +1,18 @@
+use shgen_config::search;
+use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
+
 use aho_corasick::{AhoCorasick, AhoCorasickBuilder};
 
-use crate::{
-    config::{SearchConfig, SearchFields},
-    openssh_format::{Fingerprint, OpenSSHFormatter, OpenSSHPrivateKey, OpenSSHPublicKey},
-};
+use crate::openssh_format::{Fingerprint, OpenSSHFormatter};
 
 pub struct Matcher {
-    search: SearchConfig,
+    search: search::Config,
 
     aho_corasick: AhoCorasick,
 }
 
 impl Matcher {
-    pub fn new(keywords: Vec<String>, search: SearchConfig) -> Self {
+    pub fn new(keywords: Vec<String>, search: search::Config) -> Self {
         let aho_corasick = AhoCorasickBuilder::new()
             .ascii_case_insensitive(true)
             .build(keywords)
@@ -54,24 +54,24 @@ impl Matcher {
 
     fn search_in_field(
         &self,
-        field: &SearchFields,
+        field: &search::SearchFields,
         openssh_formatter: &mut OpenSSHFormatter,
     ) -> bool {
         match field {
-            SearchFields::PublicKey => {
+            search::SearchFields::PublicKey => {
                 let public_key = openssh_formatter.format_public_key();
                 self.matches_aho_corasick(&public_key)
             }
-            SearchFields::PrivateKey => {
+            search::SearchFields::PrivateKey => {
                 let private_key = openssh_formatter.format_private_key();
                 self.matches_aho_corasick(&private_key)
             }
             fingerprint => {
                 let fingerprint_type = match fingerprint {
-                    SearchFields::Sha1Fingerprint => Fingerprint::Sha1,
-                    SearchFields::Sha256Fingerprint => Fingerprint::Sha256,
-                    SearchFields::Sha384Fingerprint => Fingerprint::Sha384,
-                    SearchFields::Sha512Fingerprint => Fingerprint::Sha512,
+                    search::SearchFields::Sha1Fingerprint => Fingerprint::Sha1,
+                    search::SearchFields::Sha256Fingerprint => Fingerprint::Sha256,
+                    search::SearchFields::Sha384Fingerprint => Fingerprint::Sha384,
+                    search::SearchFields::Sha512Fingerprint => Fingerprint::Sha512,
                     _ => unreachable!(),
                 };
 

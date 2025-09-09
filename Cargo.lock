@@ -475,7 +475,22 @@ dependencies = [
  "serde",
  "sha1",
  "sha2 0.10.9",
+ "shgen-config",
+ "shgen-core",
 ]
+
+[[package]]
+name = "shgen-config"
+version = "0.0.0"
+dependencies = [
+ "figment",
+ "serde",
+ "shgen-core",
+]
+
+[[package]]
+name = "shgen-core"
+version = "0.0.0"
 
 [[package]]
 name = "shlex"

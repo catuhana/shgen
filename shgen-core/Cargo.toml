@@ -1,0 +1,6 @@
+[package]
+name = "shgen-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

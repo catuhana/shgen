@@ -1,5 +1,7 @@
 #![allow(clippy::cast_possible_truncation)]
 
+use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
+
 use base64::{
     Engine,
     engine::{GeneralPurpose, general_purpose::STANDARD_NO_PAD},
@@ -8,9 +10,6 @@ use ed25519_dalek::{PUBLIC_KEY_LENGTH, SECRET_KEY_LENGTH, SigningKey, VerifyingK
 use rand::{RngCore, rngs::ThreadRng};
 use sha1::Sha1;
 use sha2::{Digest, Sha256, Sha384, Sha512};
-
-pub type OpenSSHPublicKey = String;
-pub type OpenSSHPrivateKey = String;
 
 pub struct OpenSSHFormatter<'a> {
     signing_key: SigningKey,

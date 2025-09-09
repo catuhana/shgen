@@ -1,0 +1,10 @@
+[package]
+name = "shgen-config"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+shgen-core = { path = "../shgen-core" }
+
+serde = { version = "1", features = ["derive"] }
+figment = { version = "0.10.19", features = ["yaml"] }
