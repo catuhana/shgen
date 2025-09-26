@@ -25,7 +25,7 @@ figment = { version = "0.10.19", features = ["yaml"] }
 mimalloc = "0.1.48"
 rand = "0.9.2"
 rand_chacha = "0.9.0"
-serde = { version = "1.0.219", features = ["derive"] }
+serde = { version = "1.0.227", features = ["derive"] }
 sha1 = "0.10.6"
 sha2 = "0.10.9"
 gdt-cpus = "25.5.0"
