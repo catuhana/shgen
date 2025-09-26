@@ -19,10 +19,7 @@ use ed25519_dalek::SigningKey;
 use rand::RngCore;
 use rand_chacha::{ChaCha8Rng, rand_core::SeedableRng};
 
-use crate::{matcher::Matcher, openssh_format::OpenSSHFormatter};
-
-mod matcher;
-mod openssh_format;
+use shgen_keys::{matcher::Matcher, openssh_format::OpenSSHFormatter};
 
 #[global_allocator]
 static ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;

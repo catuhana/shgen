@@ -526,21 +526,16 @@ dependencies = [
 name = "shgen"
 version = "0.0.0"
 dependencies = [
- "aho-corasick",
- "base64",
  "ed25519-dalek",
- "figment",
  "gdt-cpus",
  "mimalloc",
  "rand",
  "rand_chacha",
- "serde",
- "sha1",
- "sha2 0.10.9",
  "shgen-config-fs",
  "shgen-config-model",
  "shgen-core",
  "shgen-keep-awake",
+ "shgen-keys",
 ]
 
 [[package]]
@@ -569,6 +564,21 @@ name = "shgen-keep-awake"
 version = "0.0.0"
 dependencies = [
  "windows 0.62.1",
+]
+
+[[package]]
+name = "shgen-keys"
+version = "0.0.0"
+dependencies = [
+ "aho-corasick",
+ "base64",
+ "ed25519-dalek",
+ "rand",
+ "rand_chacha",
+ "sha1",
+ "sha2 0.10.9",
+ "shgen-config-model",
+ "shgen-core",
 ]
 
 [[package]]
