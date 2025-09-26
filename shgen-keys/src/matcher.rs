@@ -1,3 +1,4 @@
+use rand::Rng;
 use shgen_config_model::search;
 use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
 
@@ -27,7 +28,7 @@ impl Matcher {
 
     pub fn search_matches(
         &self,
-        openssh_formatter: &mut OpenSSHFormatter,
+        openssh_formatter: &mut OpenSSHFormatter<impl Rng>,
     ) -> Option<(OpenSSHPublicKey, OpenSSHPrivateKey)> {
         let fields = &self.search.fields;
 
@@ -56,7 +57,7 @@ impl Matcher {
     fn search_in_field(
         &self,
         field: &search::SearchFields,
-        openssh_formatter: &mut OpenSSHFormatter,
+        openssh_formatter: &mut OpenSSHFormatter<impl Rng>,
     ) -> bool {
         match field {
             search::SearchFields::PublicKey => {

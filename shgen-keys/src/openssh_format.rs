@@ -7,15 +7,15 @@ use base64::{
     engine::{GeneralPurpose, general_purpose::STANDARD_NO_PAD},
 };
 use ed25519_dalek::{PUBLIC_KEY_LENGTH, SECRET_KEY_LENGTH, SigningKey, VerifyingKey};
-use rand::{RngCore, rngs::ThreadRng};
+use rand::Rng;
 use sha1::Sha1;
 use sha2::{Digest, Sha256, Sha384, Sha512};
 
-pub struct OpenSSHFormatter<'a> {
+pub struct OpenSSHFormatter<'a, R: Rng> {
     signing_key: SigningKey,
     verifying_key: VerifyingKey,
 
-    thread_rng: &'a mut ThreadRng,
+    rng: &'a mut R,
     base64_engine: GeneralPurpose,
 }
 
@@ -55,14 +55,14 @@ const PRIVATE_KEY_BLOB_SIZE: usize = PRIVATE_KEY_MAGIC.len() // Private key magi
     + 4 // Comment length, comment
     + PRIVATE_KEY_PADDING_LEN as usize; // Padding (1, 2, 3, ..., n), maximum 7 bytes
 
-impl<'a> OpenSSHFormatter<'a> {
-    pub fn new(signing_key: SigningKey, thread_rng: &'a mut ThreadRng) -> Self {
+impl<'a, R: Rng> OpenSSHFormatter<'a, R> {
+    pub fn new(signing_key: SigningKey, rng: &'a mut R) -> Self {
         let verifying_key: VerifyingKey = signing_key.verifying_key();
 
         Self {
             signing_key,
             verifying_key,
-            thread_rng,
+            rng,
             base64_engine: STANDARD_NO_PAD,
         }
     }
@@ -201,7 +201,7 @@ impl<'a> OpenSSHFormatter<'a> {
         cursor += 4;
 
         let mut checkint = [0u8; 4];
-        self.thread_rng.fill_bytes(&mut checkint);
+        self.rng.fill_bytes(&mut checkint);
 
         // Write two random check-ints
         private_key_blob[cursor..(cursor + 4)].copy_from_slice(&checkint);
