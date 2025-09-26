@@ -6,5 +6,6 @@ edition.workspace = true
 [dependencies]
 shgen-core = { path = "../shgen-core" }
 
-serde = { version = "1", features = ["derive"] }
 figment = { version = "0.10.19", features = ["yaml"] }
+gdt-cpus.workspace = true
+serde = { version = "1", features = ["derive"] }

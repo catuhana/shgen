@@ -14,7 +14,6 @@ use shgen_config::Config;
 use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
 use shgen_keep_awake::KeepAwake;
 
-use core_affinity::{self, CoreId};
 use ed25519_dalek::SigningKey;
 use rand::RngCore;
 use rand_chacha::{ChaCha8Rng, rand_core::SeedableRng};
@@ -49,10 +48,10 @@ fn main() {
             std::thread::Builder::new()
                 .name(format!("worker-{thread_id}"))
                 .spawn(move || {
-                    if config.runtime.set_affinity
-                        && !core_affinity::set_for_current(CoreId { id: thread_id })
-                    {
-                        eprintln!("Failed to set core affinity for thread {thread_id}");
+                    if config.runtime.set_affinity {
+                        gdt_cpus::pin_thread_to_core(thread_id).unwrap_or_else(|e| {
+                            eprintln!("Failed to set core affinity for thread {thread_id}: {e}")
+                        });
                     }
 
                     worker(&matcher);

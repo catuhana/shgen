@@ -11,7 +11,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            threads: std::thread::available_parallelism().unwrap().get(),
+            threads: gdt_cpus::num_logical_cores().unwrap(),
             keep_awake: true,
             set_affinity: true,
         }

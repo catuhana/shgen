@@ -18,7 +18,6 @@ shgen-keep-awake = { path = "./shgen-keep-awake" }
 
 aho-corasick = "1.1.3"
 base64 = "0.22.1"
-core_affinity = "0.8.3"
 ed25519-dalek = { version = "3.0.0-pre.1", default-features = false, features = [
   "fast",
 ] }
@@ -29,6 +28,10 @@ rand_chacha = "0.9.0"
 serde = { version = "1.0.219", features = ["derive"] }
 sha1 = "0.10.6"
 sha2 = "0.10.9"
+gdt-cpus = "25.5.0"
+
+[workspace.dependencies]
+gdt-cpus = "25.5.0"
 
 [profile.release]
 lto = "fat"
