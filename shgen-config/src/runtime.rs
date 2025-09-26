@@ -5,7 +5,7 @@ use serde::Deserialize;
 pub struct Config {
     pub threads: usize,
     pub keep_awake: bool,
-    pub set_affinity: bool,
+    pub pin_threads: bool,
 }
 
 impl Default for Config {
@@ -13,7 +13,7 @@ impl Default for Config {
         Self {
             threads: gdt_cpus::num_logical_cores().unwrap(),
             keep_awake: true,
-            set_affinity: true,
+            pin_threads: true,
         }
     }
 }

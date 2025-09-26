@@ -65,13 +65,13 @@ runtime:
   # Prevent the system from sleeping while running.
   #
   # Default: true
-  keep_awake: true
+  keep-awake: true
 
   # Pin key generation threads to specific CPU cores.
   # Can improve performance on some systems.
   #
   # Default: true
-  set_affinity: true
+  pin-threads: true
 
   # TODO: Add `use-physical-cores` option to use only physical cores.
 

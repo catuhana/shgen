@@ -59,7 +59,7 @@ impl Config {
             self.search.matching.all_fields,
             self.runtime.threads,
             self.runtime.keep_awake,
-            self.runtime.set_affinity,
+            self.runtime.pin_threads,
             self.output.save_to.display()
         )
     }
