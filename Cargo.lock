@@ -548,7 +548,6 @@ name = "shgen-config-fs"
 version = "0.0.0"
 dependencies = [
  "figment",
- "gdt-cpus",
  "shgen-config-model",
  "shgen-core",
 ]
