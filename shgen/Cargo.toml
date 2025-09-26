@@ -1,0 +1,23 @@
+[package]
+name = "shgen"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+shgen-config = { path = "../shgen-config" }
+shgen-core = { path = "../shgen-core" }
+shgen-keep-awake = { path = "../shgen-keep-awake" }
+
+aho-corasick = "1.1.3"
+base64 = "0.22.1"
+ed25519-dalek = { version = "3.0.0-pre.1", default-features = false, features = [
+  "fast",
+] }
+figment = { version = "0.10.19", features = ["yaml"] }
+mimalloc = "0.1.48"
+rand = "0.9.2"
+rand_chacha = "0.9.0"
+serde = { workspace = true, features = ["derive"] }
+sha1 = "0.10.6"
+sha2 = "0.10.9"
+gdt-cpus.workspace = true
