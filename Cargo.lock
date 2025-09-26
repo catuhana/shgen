@@ -537,17 +537,26 @@ dependencies = [
  "serde",
  "sha1",
  "sha2 0.10.9",
- "shgen-config",
+ "shgen-config-fs",
+ "shgen-config-model",
  "shgen-core",
  "shgen-keep-awake",
 ]
 
 [[package]]
-name = "shgen-config"
+name = "shgen-config-fs"
 version = "0.0.0"
 dependencies = [
  "figment",
  "gdt-cpus",
+ "shgen-config-model",
+ "shgen-core",
+]
+
+[[package]]
+name = "shgen-config-model"
+version = "0.0.0"
+dependencies = [
  "serde",
  "shgen-core",
 ]

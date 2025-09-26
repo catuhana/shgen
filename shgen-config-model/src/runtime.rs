@@ -1,3 +1,5 @@
+#![cfg(not(feature = "wasm"))]
+
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -11,7 +13,9 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            threads: gdt_cpus::num_logical_cores().unwrap(),
+            threads: std::thread::available_parallelism()
+                .map(|n| n.get())
+                .unwrap_or(1),
             keep_awake: true,
             pin_threads: true,
         }

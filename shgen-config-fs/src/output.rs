@@ -1,18 +1,11 @@
-use std::path::PathBuf;
-
 use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
 
-use serde::Deserialize;
-
-#[derive(Deserialize)]
-#[serde(default, rename_all = "kebab-case")]
-pub struct Config {
-    pub save_to: PathBuf,
+pub trait ConfigExt {
+    fn save_keys(&self, public_key: &OpenSSHPublicKey, private_key: &OpenSSHPrivateKey);
 }
 
-// TODO: Remove this and move logic to somewhere else.
-impl Config {
-    pub fn save_keys(&self, public_key: &OpenSSHPublicKey, private_key: &OpenSSHPrivateKey) {
+impl ConfigExt for shgen_config_model::output::Config {
+    fn save_keys(&self, public_key: &OpenSSHPublicKey, private_key: &OpenSSHPrivateKey) {
         let save_dir = &self.save_to;
 
         std::fs::create_dir_all(save_dir).expect("failed to create output directory");
@@ -24,13 +17,5 @@ impl Config {
         std::fs::write(&private_key_path, private_key).expect("failed to write private key");
 
         println!("Saved keys to {}", save_dir.display());
-    }
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            save_to: PathBuf::from("found-keys"),
-        }
     }
 }

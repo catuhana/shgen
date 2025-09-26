@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["shgen", "shgen-config", "shgen-core", "shgen-keep-awake"]
+members = ["shgen", "shgen-config-fs", "shgen-config-model", "shgen-core", "shgen-keep-awake"]
 
 [workspace.package]
 version = "0.0.0"

@@ -1,0 +1,13 @@
+[package]
+name = "shgen-config-model"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+shgen-core = { path = "../shgen-core" }
+
+serde = { workspace = true, features = ["derive"] }
+
+[features]
+default = []
+wasm = []

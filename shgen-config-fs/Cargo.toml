@@ -1,11 +1,11 @@
 [package]
-name = "shgen-config"
+name = "shgen-config-fs"
 version.workspace = true
 edition.workspace = true
 
 [dependencies]
 shgen-core = { path = "../shgen-core" }
+shgen-config-model = { path = "../shgen-config-model" }
 
 figment = { version = "0.10.19", features = ["yaml"] }
 gdt-cpus.workspace = true
-serde = { workspace = true, features = ["derive"] }

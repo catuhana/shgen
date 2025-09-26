@@ -1,28 +1,22 @@
+pub mod output;
+
 use std::path::PathBuf;
 
 use figment::{
     Figment,
     providers::{Format as _, Yaml},
 };
-use serde::Deserialize;
 
-pub mod output;
-pub mod runtime;
-pub mod search;
+pub trait ConfigExt {
+    fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>>
+    where
+        Self: Sized;
 
-#[derive(Deserialize)]
-pub struct Config {
-    pub keywords: Vec<String>,
-    #[serde(default)]
-    pub search: search::Config,
-    #[serde(default)]
-    pub runtime: runtime::Config,
-    #[serde(default)]
-    pub output: output::Config,
+    fn generate_config_overview(&self) -> String;
 }
 
-impl Config {
-    pub fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>> {
+impl ConfigExt for shgen_config_model::Config {
+    fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>> {
         Figment::new()
             .merge(if let Some(path) = config_path {
                 Yaml::file(path)
@@ -39,8 +33,7 @@ impl Config {
             .map_err(Into::into)
     }
 
-    #[must_use]
-    pub fn generate_config_overview(&self) -> String {
+    fn generate_config_overview(&self) -> String {
         format!(
             "Keywords:\n  {:?}\n\
              Search fields:\n  {:?}\n\
