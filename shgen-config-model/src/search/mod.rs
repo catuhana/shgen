@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-mod matching;
+pub mod matching;
 
 #[derive(Clone, Deserialize)]
 #[serde(default)]
