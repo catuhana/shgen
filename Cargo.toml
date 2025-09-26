@@ -21,4 +21,3 @@ serde = "1.0.227"
 
 [profile.release]
 lto = "fat"
-debug = true
