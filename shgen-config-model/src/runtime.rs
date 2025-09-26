@@ -14,7 +14,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             threads: std::thread::available_parallelism()
-                .map(|n| n.get())
+                .map(std::num::NonZeroUsize::get)
                 .unwrap_or(1),
             keep_awake: true,
             pin_threads: true,

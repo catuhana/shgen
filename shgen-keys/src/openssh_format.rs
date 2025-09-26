@@ -67,6 +67,7 @@ impl<'a> OpenSSHFormatter<'a> {
         }
     }
 
+    #[must_use]
     pub fn format_public_key(&self) -> OpenSSHPublicKey {
         const OPENSSH_PUBLIC_KEY_LENGTH: usize = SSH_KEY_ALGORITHM_NAME.len() // Algorithm name length
             + 1 // Space (1 byte)
@@ -115,6 +116,7 @@ impl<'a> OpenSSHFormatter<'a> {
         private_key
     }
 
+    #[must_use]
     pub fn format_fingerprint(&self, fingerprint: &Fingerprint) -> String {
         let public_key_blob = self.generate_public_key_blob();
         match fingerprint {

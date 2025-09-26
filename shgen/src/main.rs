@@ -48,7 +48,7 @@ fn main() {
                 .spawn(move || {
                     if config.runtime.pin_threads {
                         gdt_cpus::pin_thread_to_core(thread_id).unwrap_or_else(|e| {
-                            eprintln!("Failed to set core affinity for thread {thread_id}: {e}")
+                            eprintln!("Failed to set core affinity for thread {thread_id}: {e}");
                         });
                     }
 

@@ -7,10 +7,8 @@ use figment::{
     providers::{Format as _, Yaml},
 };
 
-pub trait ConfigExt {
-    fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>>
-    where
-        Self: Sized;
+pub trait ConfigExt: Sized {
+    fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>>;
 
     fn generate_config_overview(&self) -> String;
 }

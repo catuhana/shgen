@@ -12,6 +12,7 @@ pub struct Matcher {
 }
 
 impl Matcher {
+    #[must_use]
     pub fn new(keywords: Vec<String>, search: search::Config) -> Self {
         let aho_corasick = AhoCorasickBuilder::new()
             .ascii_case_insensitive(true)
