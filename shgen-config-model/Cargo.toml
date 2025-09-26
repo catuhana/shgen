@@ -4,9 +4,8 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-shgen-core = { path = "../shgen-core" }
-
 serde = { workspace = true, features = ["derive"] }
+shgen-core = { path = "../shgen-core" }
 
 [features]
 default = []

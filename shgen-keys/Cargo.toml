@@ -4,9 +4,6 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-shgen-config-model = { path = "../shgen-config-model" }
-shgen-core = { path = "../shgen-core" }
-
 aho-corasick = "1.1.3"
 base64 = "0.22.1"
 ed25519-dalek = { workspace = true, features = ["fast"] }
@@ -14,3 +11,5 @@ rand.workspace = true
 rand_chacha.workspace = true
 sha1 = "0.10.6"
 sha2 = "0.10.9"
+shgen-config-model = { path = "../shgen-config-model" }
+shgen-core = { path = "../shgen-core" }

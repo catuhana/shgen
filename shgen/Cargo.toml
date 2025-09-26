@@ -4,15 +4,13 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+ed25519-dalek.workspace = true
+mimalloc = "0.1.48"
+gdt-cpus = "25.5.0"
+rand.workspace = true
+rand_chacha.workspace = true
 shgen-config-fs = { path = "../shgen-config-fs" }
 shgen-config-model = { path = "../shgen-config-model" }
 shgen-core = { path = "../shgen-core" }
 shgen-keep-awake = { path = "../shgen-keep-awake" }
 shgen-keys = { path = "../shgen-keys" }
-
-ed25519-dalek.workspace = true
-rand.workspace = true
-rand_chacha.workspace = true
-
-mimalloc = "0.1.48"
-gdt-cpus = "25.5.0"

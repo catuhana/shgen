@@ -7,7 +7,9 @@ members = [
   "shgen-core",
   "shgen-keep-awake",
   "shgen-keys",
+  "shgen-web",
 ]
+
 
 [workspace.package]
 version = "0.0.0"
