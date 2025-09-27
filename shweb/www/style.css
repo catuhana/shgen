@@ -259,7 +259,7 @@ div.found-result {
 
   div.status {
     hr {
-      margin: 1rem 0;
+      margin: 0.5rem 0;
 
       border: none;
       border-bottom: 1px solid var(--ctp-mocha-surface2);
@@ -271,6 +271,22 @@ div.found-result {
       font-size: 0.875rem;
 
       text-transform: uppercase;
+
+      &:after {
+        content: attr(data-status);
+      }
+
+      &[data-status="pending"] {
+        color: var(--ctp-mocha-yellow);
+      }
+
+      &[data-status="running"] {
+        color: var(--ctp-mocha-blue);
+      }
+
+      &[data-status="match found"] {
+        color: var(--ctp-mocha-green);
+      }
     }
   }
 
