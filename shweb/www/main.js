@@ -38,6 +38,7 @@ async function initialiseShweb() {
     await init();
 
     elements.startBtn.disabled = false;
+    loadSettingsFromLocalStorage();
   } catch (error) {
     updateStatus("error");
   }
@@ -205,11 +206,72 @@ function resetApplication() {
   elements.privateKeyValue.textContent = "...";
 
   updateStatus("pending");
+  clearSettingsFromLocalStorage();
 }
 
 elements.startBtn?.addEventListener("click", startGeneration);
 elements.stopBtn?.addEventListener("click", stopGeneration);
 elements.resetBtn?.addEventListener("click", resetApplication);
+
+elements.keywordsInput.addEventListener("input", saveSettingsToLocalStorage);
+elements.workersCountInput.addEventListener(
+  "input",
+  saveSettingsToLocalStorage
+);
+elements.fieldsSelect.addEventListener("change", saveSettingsToLocalStorage);
+elements.anyKeywordRadio.addEventListener("change", saveSettingsToLocalStorage);
+elements.allKeywordsRadio.addEventListener(
+  "change",
+  saveSettingsToLocalStorage
+);
+elements.anyFieldRadio.addEventListener("change", saveSettingsToLocalStorage);
+elements.allFieldsRadio.addEventListener("change", saveSettingsToLocalStorage);
+
+function saveSettingsToLocalStorage() {
+  const settings = {
+    keywords: elements.keywordsInput.value,
+    workersCount: elements.workersCountInput.value,
+    fields: Array.from(elements.fieldsSelect.selectedOptions).map(
+      (o) => o.value
+    ),
+    keywordMatching: elements.allKeywordsRadio.checked ? "all" : "any",
+    fieldMatching: elements.allFieldsRadio.checked ? "all" : "any",
+  };
+
+  localStorage.setItem("settings", JSON.stringify(settings));
+}
+
+function loadSettingsFromLocalStorage() {
+  const settings = JSON.parse(localStorage.getItem("settings") || "null");
+  if (!settings) return;
+
+  elements.keywordsInput.value = settings.keywords || "";
+  elements.workersCountInput.value =
+    settings.workersCount || elements.workersCountInput.value;
+
+  Array.from(elements.fieldsSelect.options).forEach((option) => {
+    option.selected = settings.fields?.includes(option.value) || false;
+  });
+
+  if (settings.keywordMatching === "all") {
+    elements.allKeywordsRadio.checked = true;
+    elements.anyKeywordRadio.checked = false;
+  } else {
+    elements.anyKeywordRadio.checked = true;
+    elements.allKeywordsRadio.checked = false;
+  }
+  if (settings.fieldMatching === "all") {
+    elements.allFieldsRadio.checked = true;
+    elements.anyFieldRadio.checked = false;
+  } else {
+    elements.anyFieldRadio.checked = true;
+    elements.allFieldsRadio.checked = false;
+  }
+}
+
+function clearSettingsFromLocalStorage() {
+  localStorage.removeItem("settings");
+}
 
 window.addEventListener("beforeunload", () => {
   state.workers.forEach((worker) => worker.terminate());
