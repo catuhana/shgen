@@ -47,7 +47,7 @@ div.settings {
   background-color: var(--ctp-mocha-surface0);
 
   border: 1px solid var(--ctp-mocha-surface1);
-  border-radius: .5rem;
+  border-radius: 0.5rem;
 
   padding: 1rem;
 }
@@ -56,7 +56,8 @@ div.setting-group {
   margin-bottom: 1.5rem;
 }
 
-span.setting-label, label.setting-label {
+span.setting-label,
+label.setting-label {
   display: block;
 
   margin-bottom: 0.25rem;
@@ -79,7 +80,9 @@ span.cpu-cores-helper-text {
   font-style: italic;
 }
 
-input[type="text"], input[type="number"], select {
+input[type="text"],
+input[type="number"],
+select {
   font-family: inherit;
 
   width: 100%;
@@ -150,7 +153,7 @@ div.button-group {
       border-bottom-right-radius: 0.2rem;
     }
 
-    &:has(input[type='radio']:checked) {
+    &:has(input[type="radio"]:checked) {
       color: var(--ctp-mocha-base);
       background-color: var(--ctp-mocha-lavender);
     }
@@ -161,7 +164,7 @@ div.button-group {
       width: 100%;
 
       font-size: 0.85rem;
-      
+
       padding: 0.6rem;
 
       cursor: pointer;
@@ -220,7 +223,7 @@ div.stats {
   padding: 1rem;
 
   border: 1px solid var(--ctp-mocha-surface1);
-  border-radius: .5rem;
+  border-radius: 0.5rem;
 
   div.stat {
     flex: 1;
@@ -229,7 +232,7 @@ div.stats {
 
     span.stat-value {
       display: block;
-      
+
       color: var(--ctp-mocha-lavender);
 
       font-size: large;
@@ -252,7 +255,7 @@ div.found-result {
   padding: 1rem;
 
   border: 1px solid var(--ctp-mocha-surface1);
-  border-radius: .5rem;
+  border-radius: 0.5rem;
 
   div.status {
     hr {
@@ -287,7 +290,7 @@ div.found-result {
         color: var(--ctp-mocha-overlay1);
 
         font-size: small;
-        
+
         text-transform: uppercase;
       }
 
