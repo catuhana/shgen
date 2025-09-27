@@ -1,4 +1,4 @@
-import init, { Generator } from "../pkg/shweb.js";
+import init, { Generator } from "./shweb-wasm/shweb.js";
 
 class SSHKeyWorker {
   #generator = null;

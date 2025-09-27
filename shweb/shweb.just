@@ -1,0 +1,40 @@
+set windows-shell := ["powershell.exe", "-c"]
+
+www := "www"
+wasm := www / "shweb-wasm"
+dist := "dist"
+
+clean: clean-wasm clean-dist
+
+[unix]
+clean-wasm:
+  rm -rf "{{wasm}}"
+
+[windows]
+clean-wasm:
+  if (Test-Path "{{wasm}}") { Remove-Item -Recurse -Force "{{wasm}}" }
+
+[unix]
+clean-dist:
+  rm -rf "{{dist}}"
+
+[windows]
+clean-dist:
+  if (Test-Path "{{dist}}") { Remove-Item -Recurse -Force "{{dist}}" }
+
+build-wasm $RUSTFLAGS='--cfg getrandom_backend="wasm_js"': clean-wasm
+  wasm-pack build --target web --release --out-dir "{{wasm}}"
+
+[unix]
+build: build-wasm clean-dist
+  mkdir -p "{{dist}}"
+
+  cp "{{www}}/*" "{{dist}}"
+  cp -r "{{wasm}}" "{{dist}}/shweb-wasm"
+
+[windows]
+build: clean build-wasm
+  New-Item -ItemType Directory -Path "{{dist}}" | Out-Null
+
+  Copy-Item -Path "{{www}}/*" -Destination "{{dist}}" -Recurse
+  Copy-Item -Path "{{wasm}}" -Destination "{{dist}}/shweb-wasm" -Recurse

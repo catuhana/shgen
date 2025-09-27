@@ -1,4 +1,4 @@
-import init from "../pkg/shweb.js";
+import init from "./shweb-wasm/shweb.js";
 import { setWorkerCountToCpuCores } from "./detect-cpu-cores.js";
 
 const STORAGE_KEY = "shweb-settings";
@@ -81,7 +81,9 @@ class SSHKeyGeneratorApp {
   async #initialise() {
     try {
       await init();
+
       elements.startBtn.disabled = false;
+
       this.#loadSettings();
       this.#updateStatus("ready");
     } catch (error) {
