@@ -7,7 +7,7 @@ members = [
   "shgen-core",
   "shgen-keep-awake",
   "shgen-keys",
-  "shgen-web",
+  "shweb",
 ]
 
 

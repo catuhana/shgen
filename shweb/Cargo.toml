@@ -1,5 +1,5 @@
 [package]
-name = "shgen-web"
+name = "shweb"
 version.workspace = true
 edition.workspace = true
 
