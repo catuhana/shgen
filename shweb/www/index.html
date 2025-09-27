@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>shweb</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="main">
+      <main>
+        <div class="settings">
+          <div class="setting-group">
+            <label class="setting-label" for="search-keywords"
+              >keywords to search for</label
+            >
+            <input
+              type="text"
+              name="search-keywords"
+              id="search-keywords"
+              placeholder="add keyword and hit enter"
+            />
+          </div>
+          <div class="setting-group">
+            <label class="setting-label" for="workers-count"
+              >number of workers</label
+            >
+            <input
+              type="number"
+              name="workers-count"
+              id="workers-count"
+              value="4"
+              min="1"
+              max="128"
+            />
+            <span class="cpu-cores-helper-text"
+              >Detected CPU cores:
+              <span class="cpu-cores-count">NaN</span></span
+            >
+          </div>
+          <div class="setting-group">
+            <label class="setting-label" for="search-in-fields"
+              >search in fields</label
+            >
+            <select
+              class="setting-select"
+              name="search-in-fields"
+              id="search-in-fields"
+              multiple
+            >
+              <option value="public-key" selected>Public Key</option>
+              <option value="private-key">Private Key</option>
+              <option value="sha1-fingerprint">SHA1 Fingerprint</option>
+              <option value="sha256-fingerprint" selected>
+                SHA256 Fingerprint
+              </option>
+              <option value="sha384-fingerprint">SHA384 Fingerprint</option>
+              <option value="sha512-fingerprint">SHA512 Fingerprint</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <span class="setting-label">keyword matching</span>
+            <div class="button-group">
+              <div class="button-group-button">
+                <label class="button-group-button-label" for="any-keyword"
+                  >any keyword</label
+                >
+                <input
+                  type="radio"
+                  name="keyword-matching"
+                  id="any-keyword"
+                  checked
+                />
+              </div>
+              <div class="button-group-button">
+                <label class="button-group-button-label" for="all-keywords"
+                  >all keywords</label
+                >
+                <input type="radio" name="keyword-matching" id="all-keywords" />
+              </div>
+            </div>
+          </div>
+          <div class="setting-group">
+            <span class="setting-label">field matching</span>
+            <div class="button-group">
+              <div class="button-group-button">
+                <label class="button-group-button-label" for="any-field"
+                  >any field</label
+                >
+                <input type="radio" name="field-matching" id="any-field" />
+              </div>
+              <div class="button-group-button">
+                <label class="button-group-button-label" for="all-fields"
+                  >all fields</label
+                >
+                <input
+                  type="radio"
+                  name="field-matching"
+                  id="all-fields"
+                  checked
+                />
+              </div>
+            </div>
+          </div>
+          <div class="control-buttons">
+            <button type="button">start</button>
+            <button type="button">stop</button>
+            <button type="button">reset</button>
+          </div>
+        </div>
+        <div class="results">
+          <div class="stats">
+            <div class="stat">
+              <span class="stat-value">00:00:00</span>
+              <span class="stat-label">running time</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">0</span>
+              <span class="stat-label">keys generated</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">0</span>
+              <span class="stat-label">keys/sec</span>
+            </div>
+          </div>
+          <div class="found-result">
+            <div class="status">
+              <span class="status-text">match found</span>
+              <hr />
+            </div>
+            <div class="found-key">
+              <div class="key-info">
+                <span class="key-name">Public Key</span>
+                <div class="key-value"><code>...</code></div>
+              </div>
+              <div class="key-info">
+                <span class="key-name">Private Key</span>
+                <div class="key-value"><code>...</code></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
