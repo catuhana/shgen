@@ -276,6 +276,10 @@ div.found-result {
         content: attr(data-status);
       }
 
+      &[data-status="error"] {
+        color: var(--ctp-mocha-red);
+      }
+
       &[data-status="pending"] {
         color: var(--ctp-mocha-yellow);
       }

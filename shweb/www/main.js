@@ -1,280 +1,374 @@
 import init from "../pkg/shweb.js";
-
 import { setWorkerCountToCpuCores } from "./detect-cpu-cores.js";
 
-const state = {
-  workers: [],
-  isGenerating: false,
-  startTime: 0,
-  totalKeysGenerated: 0,
-  statusInterval: null,
-};
+const STORAGE_KEY = "shweb-settings";
+const UPDATE_INTERVAL = 300;
+const DEFAULT_BATCH_SIZE = 256;
 
 const elements = {
-  keywordsInput: document.getElementById("search-keywords"),
-  workersCountInput: document.getElementById("workers-count"),
-  fieldsSelect: document.getElementById("search-in-fields"),
-  anyKeywordRadio: document.getElementById("any-keyword"),
-  allKeywordsRadio: document.getElementById("all-keywords"),
-  anyFieldRadio: document.getElementById("any-field"),
-  allFieldsRadio: document.getElementById("all-fields"),
-  startBtn: document.querySelector('button[type="button"]:nth-of-type(1)'),
-  stopBtn: document.querySelector('button[type="button"]:nth-of-type(2)'),
-  resetBtn: document.querySelector('button[type="button"]:nth-of-type(3)'),
-  statusText: document.querySelector(".status-text"),
-  runningTime: document.querySelector(".stat:nth-child(1) .stat-value"),
-  keysGenerated: document.querySelector(".stat:nth-child(2) .stat-value"),
-  keysPerSec: document.querySelector(".stat:nth-child(3) .stat-value"),
-  publicKeyValue: document.querySelector(
-    ".key-info:nth-child(1) .key-value code"
-  ),
-  privateKeyValue: document.querySelector(
-    ".key-info:nth-child(2) .key-value code"
-  ),
+  get keywordsInput() {
+    return document.getElementById("search-keywords");
+  },
+  get workersCountInput() {
+    return document.getElementById("workers-count");
+  },
+  get fieldsSelect() {
+    return document.getElementById("search-in-fields");
+  },
+  get anyKeywordRadio() {
+    return document.getElementById("any-keyword");
+  },
+  get allKeywordsRadio() {
+    return document.getElementById("all-keywords");
+  },
+  get anyFieldRadio() {
+    return document.getElementById("any-field");
+  },
+  get allFieldsRadio() {
+    return document.getElementById("all-fields");
+  },
+  get startBtn() {
+    return (
+      document.querySelector('[data-action="start"]') ||
+      document.querySelector('button[type="button"]:nth-of-type(1)')
+    );
+  },
+  get stopBtn() {
+    return (
+      document.querySelector('[data-action="stop"]') ||
+      document.querySelector('button[type="button"]:nth-of-type(2)')
+    );
+  },
+  get resetBtn() {
+    return (
+      document.querySelector('[data-action="reset"]') ||
+      document.querySelector('button[type="button"]:nth-of-type(3)')
+    );
+  },
+  get statusText() {
+    return document.querySelector(".status-text");
+  },
+  get runningTime() {
+    return document.querySelector(".stat:nth-child(1) .stat-value");
+  },
+  get keysGenerated() {
+    return document.querySelector(".stat:nth-child(2) .stat-value");
+  },
+  get keysPerSec() {
+    return document.querySelector(".stat:nth-child(3) .stat-value");
+  },
+  get publicKeyValue() {
+    return document.querySelector(".key-info:nth-child(1) .key-value code");
+  },
+  get privateKeyValue() {
+    return document.querySelector(".key-info:nth-child(2) .key-value code");
+  },
 };
 
-async function initialiseShweb() {
-  try {
-    await init();
+class SSHKeyGeneratorApp {
+  #workers = new Set();
+  #isGenerating = false;
+  #startTime = 0;
+  #totalKeysGenerated = 0;
+  #statsUpdateInterval = null;
+  #abortController = null;
+
+  constructor() {
+    this.#bindEventListeners();
+    this.#initialise();
+  }
+
+  async #initialise() {
+    try {
+      await init();
+      elements.startBtn.disabled = false;
+      this.#loadSettings();
+      this.#updateStatus("ready");
+    } catch (error) {
+      console.error("Initialisation failed:", error);
+      this.#updateStatus("error");
+    }
+  }
+
+  #bindEventListeners() {
+    elements.startBtn?.addEventListener("click", () => this.start());
+    elements.stopBtn?.addEventListener("click", () => this.stop());
+    elements.resetBtn?.addEventListener("click", () => this.reset());
+
+    const settingsElements = [
+      "keywordsInput",
+      "workersCountInput",
+      "fieldsSelect",
+      "anyKeywordRadio",
+      "allKeywordsRadio",
+      "anyFieldRadio",
+      "allFieldsRadio",
+    ];
+
+    settingsElements.forEach((elementKey) => {
+      const element = elements[elementKey];
+      if (element) {
+        const eventType =
+          element.type === "select-multiple" ? "change" : "input";
+        element.addEventListener(eventType, () => this.#saveSettings());
+      }
+    });
+
+    window.addEventListener("beforeunload", () => this.#cleanup());
+  }
+
+  #updateStatus(status) {
+    elements.statusText?.setAttribute("data-status", status);
+  }
+
+  #formatTime(seconds) {
+    const pad = (num) => Math.floor(num).toString().padStart(2, "0");
+    return `${pad(seconds / 3600)}:${pad((seconds % 3600) / 60)}:${pad(
+      seconds % 60
+    )}`;
+  }
+
+  #updateStats() {
+    if (!this.#isGenerating) return;
+
+    const elapsedSeconds = (performance.now() - this.#startTime) / 1000;
+    const keysPerSec =
+      elapsedSeconds > 0
+        ? Math.round(this.#totalKeysGenerated / elapsedSeconds)
+        : 0;
+
+    elements.runningTime.textContent = this.#formatTime(elapsedSeconds);
+    elements.keysGenerated.textContent =
+      this.#totalKeysGenerated.toLocaleString();
+    elements.keysPerSec.textContent = keysPerSec.toLocaleString();
+  }
+
+  #getConfig() {
+    const keywords = elements.keywordsInput.value
+      .split(",")
+      .map((k) => k.trim())
+      .filter((k) => k.length > 0);
+
+    const fields = Array.from(elements.fieldsSelect.selectedOptions).map(
+      (option) => option.value
+    );
+
+    return {
+      keywords,
+      fields,
+      all_keywords: elements.allKeywordsRadio.checked,
+      all_fields: elements.allFieldsRadio.checked,
+    };
+  }
+
+  #validateConfig(config) {
+    if (!config.keywords.length) {
+      throw new Error("Please enter at least one keyword");
+    }
+    if (!config.fields.length) {
+      throw new Error("Please select at least one field to search");
+    }
+  }
+
+  #handleWorkerMessage = (event) => {
+    const { type, data, keysGenerated, error } = event.data;
+
+    switch (type) {
+      case "initialised":
+        event.target.postMessage({ type: "start" });
+        break;
+      case "progress":
+        this.#totalKeysGenerated += keysGenerated || 0;
+        break;
+      case "found":
+        this.stop();
+        this.#displayResult(data);
+        this.#updateStatus("match found");
+        break;
+      case "error":
+        console.error("Worker error:", error);
+        this.#updateStatus("error");
+        break;
+      case "stopped":
+        break;
+    }
+  };
+
+  #displayResult({ publicKey, privateKey }) {
+    elements.publicKeyValue.textContent = publicKey || "Error loading key";
+    elements.privateKeyValue.textContent = privateKey || "Error loading key";
+  }
+
+  async start() {
+    try {
+      const config = this.#getConfig();
+      this.#validateConfig(config);
+
+      const workerCount = Math.max(
+        1,
+        parseInt(elements.workersCountInput.value) || 1
+      );
+
+      this.#isGenerating = true;
+      this.#startTime = performance.now();
+      this.#totalKeysGenerated = 0;
+      this.#abortController = new AbortController();
+
+      elements.publicKeyValue.textContent = "...";
+      elements.privateKeyValue.textContent = "...";
+
+      elements.startBtn.disabled = true;
+      elements.stopBtn.disabled = false;
+      this.#updateStatus("running");
+
+      await this.#createWorkers(workerCount, config);
+
+      this.#statsUpdateInterval = setInterval(
+        () => this.#updateStats(),
+        UPDATE_INTERVAL
+      );
+      this.#updateStats();
+    } catch (error) {
+      console.error("Start failed:", error);
+      this.#updateStatus("error");
+      elements.startBtn.disabled = false;
+    }
+  }
+
+  async #createWorkers(workerCount, config) {
+    const workerPromises = Array.from({ length: workerCount }, async () => {
+      if (this.#abortController?.signal.aborted) return null;
+
+      try {
+        const worker = new Worker("./worker.js", { type: "module" });
+        worker.onmessage = this.#handleWorkerMessage;
+        worker.onerror = (error) => {
+          console.error("Worker error:", error);
+          this.#updateStatus("error");
+        };
+
+        worker.postMessage({
+          type: "init",
+          config,
+          batchSize: DEFAULT_BATCH_SIZE,
+        });
+
+        this.#workers.add(worker);
+        return worker;
+      } catch (error) {
+        console.error("Worker creation failed:", error);
+        throw error;
+      }
+    });
+
+    await Promise.all(workerPromises);
+  }
+
+  stop() {
+    if (!this.#isGenerating) return;
+
+    this.#isGenerating = false;
+    this.#abortController?.abort();
 
     elements.startBtn.disabled = false;
-    loadSettingsFromLocalStorage();
-  } catch (error) {
-    updateStatus("error");
-  }
-}
+    elements.stopBtn.disabled = true;
 
-function updateStatus(status = "pending") {
-  elements.statusText.setAttribute("data-status", status);
-}
+    this.#workers.forEach((worker) => {
+      worker.postMessage({ type: "stop" });
+      worker.terminate();
+    });
+    this.#workers.clear();
 
-function formatTime(seconds) {
-  const h = Math.floor(seconds / 3600)
-    .toString()
-    .padStart(2, "0");
-  const m = Math.floor((seconds % 3600) / 60)
-    .toString()
-    .padStart(2, "0");
-  const s = Math.floor(seconds % 60)
-    .toString()
-    .padStart(2, "0");
+    if (this.#statsUpdateInterval) {
+      clearInterval(this.#statsUpdateInterval);
+      this.#statsUpdateInterval = null;
+    }
 
-  return `${h}:${m}:${s}`;
-}
-
-function updateStats() {
-  if (!state.isGenerating) return;
-
-  const elapsedSeconds = (performance.now() - state.startTime) / 1000;
-  const keysPerSec = Math.round(state.totalKeysGenerated / elapsedSeconds);
-
-  elements.runningTime.textContent = formatTime(elapsedSeconds);
-  elements.keysGenerated.textContent =
-    state.totalKeysGenerated.toLocaleString();
-  elements.keysPerSec.textContent = keysPerSec.toLocaleString();
-}
-
-function getConfig() {
-  const keywords = elements.keywordsInput.value
-    .split(",")
-    .map((k) => k.trim())
-    .filter((k) => k.length > 0);
-
-  const fields = Array.from(elements.fieldsSelect.selectedOptions).map(
-    (option) => option.value
-  );
-
-  return {
-    keywords,
-    fields,
-    all_keywords: elements.allKeywordsRadio.checked,
-    all_fields: elements.allFieldsRadio.checked,
-  };
-}
-
-function validateConfig(config) {
-  if (config.keywords.length === 0) {
-    throw new Error("Please enter at least one keyword");
+    this.#updateStatus("pending");
   }
 
-  if (config.fields.length === 0) {
-    throw new Error("Please select at least one field to search");
-  }
-}
+  reset() {
+    this.stop();
 
-function handleWorkerMessage(event) {
-  const { type, data, keysGenerated, error } = event.data;
+    elements.keywordsInput.value = "";
+    setWorkerCountToCpuCores();
 
-  switch (type) {
-    case "initialized":
-      event.target.postMessage({ type: "start" });
-      break;
-    case "progress":
-      state.totalKeysGenerated += keysGenerated || 0;
-      break;
-    case "found":
-      stopGeneration();
-
-      displayResult(data);
-      updateStatus("match found");
-
-      break;
-    case "error":
-      updateStatus(`Error: ${error}`, "error");
-      break;
-  }
-}
-
-function displayResult(result) {
-  elements.publicKeyValue.textContent = result[0];
-  elements.privateKeyValue.textContent = result[1];
-}
-
-async function startGeneration() {
-  try {
-    const config = getConfig();
-    validateConfig(config);
-
-    const workerCount = Math.max(1, parseInt(elements.workersCountInput.value));
-
-    state.isGenerating = true;
-    state.startTime = performance.now();
-    state.totalKeysGenerated = 0;
+    this.#totalKeysGenerated = 0;
+    elements.runningTime.textContent = "00:00:00";
+    elements.keysGenerated.textContent = "0";
+    elements.keysPerSec.textContent = "0";
 
     elements.publicKeyValue.textContent = "...";
     elements.privateKeyValue.textContent = "...";
 
-    elements.startBtn.disabled = true;
-    elements.stopBtn.disabled = false;
-    updateStatus("running");
+    this.#updateStatus("pending");
+    this.#clearSettings();
+  }
 
-    for (let i = 0; i < workerCount; i++) {
-      const worker = new Worker("./worker.js", { type: "module" });
+  #saveSettings() {
+    try {
+      const settings = {
+        keywords: elements.keywordsInput.value,
+        workersCount: elements.workersCountInput.value,
+        fields: Array.from(elements.fieldsSelect.selectedOptions).map(
+          (o) => o.value
+        ),
+        keywordMatching: elements.allKeywordsRadio.checked ? "all" : "any",
+        fieldMatching: elements.allFieldsRadio.checked ? "all" : "any",
+      };
 
-      worker.onmessage = handleWorkerMessage;
-      worker.postMessage({
-        type: "init",
-        config,
-        batchSize: 256,
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    } catch (error) {
+      console.warn("Failed to save settings:", error);
+    }
+  }
+
+  #loadSettings() {
+    try {
+      const settings = JSON.parse(
+        sessionStorage.getItem(STORAGE_KEY) || "null"
+      );
+      if (!settings) return;
+
+      elements.keywordsInput.value = settings.keywords || "";
+      elements.workersCountInput.value =
+        settings.workersCount || elements.workersCountInput.value;
+
+      Array.from(elements.fieldsSelect.options).forEach((option) => {
+        option.selected = settings.fields?.includes(option.value) || false;
       });
 
-      state.workers.push(worker);
+      const keywordRadios =
+        settings.keywordMatching === "all"
+          ? [elements.allKeywordsRadio, elements.anyKeywordRadio]
+          : [elements.anyKeywordRadio, elements.allKeywordsRadio];
+
+      keywordRadios[0].checked = true;
+      keywordRadios[1].checked = false;
+
+      const fieldRadios =
+        settings.fieldMatching === "all"
+          ? [elements.allFieldsRadio, elements.anyFieldRadio]
+          : [elements.anyFieldRadio, elements.allFieldsRadio];
+
+      fieldRadios[0].checked = true;
+      fieldRadios[1].checked = false;
+    } catch (error) {
+      console.warn("Failed to load settings:", error);
     }
+  }
 
-    state.statusInterval = setInterval(updateStats, 1000);
-    updateStats();
-  } catch (error) {
-    updateStatus("error");
-    elements.startBtn.disabled = false;
+  #clearSettings() {
+    try {
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.warn("Failed to clear settings:", error);
+    }
+  }
+
+  #cleanup() {
+    this.stop();
   }
 }
 
-function stopGeneration() {
-  if (!state.isGenerating) return;
-
-  state.isGenerating = false;
-
-  elements.startBtn.disabled = false;
-  elements.stopBtn.disabled = true;
-
-  state.workers.forEach((worker) => {
-    worker.postMessage({ type: "stop" });
-    worker.terminate();
-  });
-  state.workers = [];
-
-  if (state.statusInterval) {
-    clearInterval(state.statusInterval);
-    state.statusInterval = null;
-  }
-
-  updateStatus("pending");
-}
-
-function resetApplication() {
-  stopGeneration();
-
-  elements.keywordsInput.value = "";
-  setWorkerCountToCpuCores();
-
-  state.totalKeysGenerated = 0;
-  elements.runningTime.textContent = "00:00:00";
-  elements.keysGenerated.textContent = "0";
-  elements.keysPerSec.textContent = "0";
-
-  elements.publicKeyValue.textContent = "...";
-  elements.privateKeyValue.textContent = "...";
-
-  updateStatus("pending");
-  clearSettingsFromLocalStorage();
-}
-
-elements.startBtn?.addEventListener("click", startGeneration);
-elements.stopBtn?.addEventListener("click", stopGeneration);
-elements.resetBtn?.addEventListener("click", resetApplication);
-
-elements.keywordsInput.addEventListener("input", saveSettingsToLocalStorage);
-elements.workersCountInput.addEventListener(
-  "input",
-  saveSettingsToLocalStorage
-);
-elements.fieldsSelect.addEventListener("change", saveSettingsToLocalStorage);
-elements.anyKeywordRadio.addEventListener("change", saveSettingsToLocalStorage);
-elements.allKeywordsRadio.addEventListener(
-  "change",
-  saveSettingsToLocalStorage
-);
-elements.anyFieldRadio.addEventListener("change", saveSettingsToLocalStorage);
-elements.allFieldsRadio.addEventListener("change", saveSettingsToLocalStorage);
-
-function saveSettingsToLocalStorage() {
-  const settings = {
-    keywords: elements.keywordsInput.value,
-    workersCount: elements.workersCountInput.value,
-    fields: Array.from(elements.fieldsSelect.selectedOptions).map(
-      (o) => o.value
-    ),
-    keywordMatching: elements.allKeywordsRadio.checked ? "all" : "any",
-    fieldMatching: elements.allFieldsRadio.checked ? "all" : "any",
-  };
-
-  localStorage.setItem("settings", JSON.stringify(settings));
-}
-
-function loadSettingsFromLocalStorage() {
-  const settings = JSON.parse(localStorage.getItem("settings") || "null");
-  if (!settings) return;
-
-  elements.keywordsInput.value = settings.keywords || "";
-  elements.workersCountInput.value =
-    settings.workersCount || elements.workersCountInput.value;
-
-  Array.from(elements.fieldsSelect.options).forEach((option) => {
-    option.selected = settings.fields?.includes(option.value) || false;
-  });
-
-  if (settings.keywordMatching === "all") {
-    elements.allKeywordsRadio.checked = true;
-    elements.anyKeywordRadio.checked = false;
-  } else {
-    elements.anyKeywordRadio.checked = true;
-    elements.allKeywordsRadio.checked = false;
-  }
-  if (settings.fieldMatching === "all") {
-    elements.allFieldsRadio.checked = true;
-    elements.anyFieldRadio.checked = false;
-  } else {
-    elements.anyFieldRadio.checked = true;
-    elements.allFieldsRadio.checked = false;
-  }
-}
-
-function clearSettingsFromLocalStorage() {
-  localStorage.removeItem("settings");
-}
-
-window.addEventListener("beforeunload", () => {
-  state.workers.forEach((worker) => worker.terminate());
-});
-
-initialiseShweb();
+new SSHKeyGeneratorApp();
