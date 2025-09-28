@@ -1,0 +1,68 @@
+name: Publish shweb
+run-name: ${{ inputs.reason }}
+
+on:
+  push:
+    paths:
+      - "shweb/**"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Manual dispatch reason
+        type: string
+        required: true
+
+permissions:
+  pages: write
+  id-token: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish-shweb:
+    name: Publish shweb
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy-pages.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Set up or update Rust toolchain
+        run: rustup toolchain install stable --profile default
+
+      - name: Install wasm32 target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Set up Rust cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target/
+          key: ${{ runner.os }}-cargo-stable-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install `just` and `wasm-pack`
+        run: |
+          cargo install just
+          cargo install wasm-pack
+
+      - name: Build shweb
+        run: just shweb::build
+
+      - name: Upload artifacts
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: shweb/dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: deploy-pages
