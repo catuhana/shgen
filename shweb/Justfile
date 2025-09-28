@@ -37,4 +37,3 @@ build: clean build-wasm
   New-Item -ItemType Directory -Path "{{dist}}" | Out-Null
 
   Copy-Item -Path "{{www}}/*" -Destination "{{dist}}" -Recurse
-  Copy-Item -Path "{{wasm}}" -Destination "{{dist}}/shweb-wasm" -Recurse
