@@ -1,4 +1,4 @@
-#![cfg(not(feature = "wasm"))]
+#![cfg(not(feature = "wasm-js"))]
 
 use serde::Deserialize;
 

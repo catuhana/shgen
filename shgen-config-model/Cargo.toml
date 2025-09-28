@@ -9,4 +9,4 @@ shgen-core = { path = "../shgen-core" }
 
 [features]
 default = []
-wasm = []
+wasm-js = []

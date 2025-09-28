@@ -12,6 +12,6 @@ ed25519-dalek.workspace = true
 getrandom = { version = "0.3.3", features = ["wasm_js"] }
 rand_chacha.workspace = true
 serde-wasm-bindgen = "0.6.5"
-shgen-config-model = { path = "../shgen-config-model", features = ["wasm"] }
+shgen-config-model = { path = "../shgen-config-model", features = ["wasm-js"] }
 shgen-keys = { path = "../shgen-keys" }
 wasm-bindgen = "0.2.104"
