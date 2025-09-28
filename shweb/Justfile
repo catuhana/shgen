@@ -30,7 +30,6 @@ build: build-wasm clean-dist
   mkdir -p "{{dist}}"
 
   cp "{{www}}/*" "{{dist}}"
-  cp -r "{{wasm}}" "{{dist}}/shweb-wasm"
 
 [windows]
 build: clean build-wasm
