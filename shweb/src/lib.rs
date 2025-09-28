@@ -7,11 +7,8 @@ use shgen_config_model::Config;
 use shgen_keys::{matcher::Matcher, openssh_format::OpenSSHFormatter};
 use wasm_bindgen::prelude::*;
 
-// TODO: Mimalloc apparently supports WASM,
-// experiment with it.
-
 #[wasm_bindgen]
-struct Generator {
+pub struct Generator {
     matcher: Matcher,
     rng: ChaCha8Rng,
 }
