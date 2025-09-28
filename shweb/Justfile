@@ -26,7 +26,7 @@ build-wasm $RUSTFLAGS='-Ctarget-feature=+simd128,+relaxed-simd,+sign-ext,+tail-c
   wasm-pack build --target web --release --out-dir "{{wasm}}"
 
 [unix]
-build: build-wasm clean-dist
+build: clean build-wasm
   mkdir -p "{{dist}}"
 
   cp "{{www}}/*" "{{dist}}"
