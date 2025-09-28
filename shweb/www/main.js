@@ -319,7 +319,7 @@ class SSHKeyGeneratorApp {
         fieldMatching: elements.allFieldsRadio.checked ? "all" : "any",
       };
 
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     } catch (error) {
       console.warn("Failed to save settings:", error);
     }
@@ -327,9 +327,7 @@ class SSHKeyGeneratorApp {
 
   #loadSettings() {
     try {
-      const settings = JSON.parse(
-        sessionStorage.getItem(STORAGE_KEY) || "null"
-      );
+      const settings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
       if (!settings) return;
 
       elements.keywordsInput.value = settings.keywords || "";
@@ -362,7 +360,7 @@ class SSHKeyGeneratorApp {
 
   #clearSettings() {
     try {
-      sessionStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
       console.warn("Failed to clear settings:", error);
     }
