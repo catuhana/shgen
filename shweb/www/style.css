@@ -280,12 +280,12 @@ div.found-result {
         color: var(--ctp-mocha-red);
       }
 
-      &[data-status="pending"] {
-        color: var(--ctp-mocha-yellow);
+      &[data-status="ready"] {
+        color: var(--ctp-mocha-blue);
       }
 
       &[data-status="running"] {
-        color: var(--ctp-mocha-blue);
+        color: var(--ctp-mocha-rosewater);
       }
 
       &[data-status="match found"] {
@@ -332,4 +332,6 @@ div.found-result {
 code {
   font-size: small;
   font-family: "Open Sans Code", monospace;
+
+  white-space: pre-wrap;
 }

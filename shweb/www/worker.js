@@ -1,42 +1,37 @@
 import init, { Generator } from "./shweb-wasm/shweb.js";
 
 class SSHKeyWorker {
-  #generator = null;
+  #generator;
+
   #isRunning = false;
-  batchSize = 256;
-  #abortController = null;
+  #abortController;
 
-  async initialise(config, batchSize = 256) {
-    if (this.#generator) {
-      throw new Error("Worker already initialised");
-    }
+  batchSize;
 
-    try {
-      await init();
+  constructor(defaultBatchSize = 256) {
+    this.batchSize = defaultBatchSize;
+  }
 
-      this.#generator = new Generator(config);
-      this.batchSize = batchSize;
+  async initialise(config, batchSize = this.batchSize) {
+    if (this.#generator) throw new Error("Already initialised");
 
-      return { success: true, batchSize: this.batchSize };
-    } catch (error) {
-      throw new Error(`Initialisation failed: ${error.message}`);
-    }
+    await init();
+
+    this.#generator = new Generator(config);
+    this.batchSize = batchSize;
+
+    return { success: true, batchSize: this.batchSize };
   }
 
   async start() {
-    if (!this.#generator) {
-      throw new Error("Worker not initialised. Call initialise first.");
-    }
-
-    if (this.#isRunning) {
-      throw new Error("Generation already running");
-    }
+    if (!this.#generator) throw new Error("Not initialised");
+    if (this.#isRunning) throw new Error("Already running");
 
     this.#isRunning = true;
     this.#abortController = new AbortController();
 
     try {
-      await this.#generateLoop();
+      await this.#loop();
     } finally {
       this.#isRunning = false;
     }
@@ -45,136 +40,90 @@ class SSHKeyWorker {
   stop() {
     if (!this.#isRunning) return;
 
-    this.#isRunning = false;
     this.#abortController?.abort();
+    this.#isRunning = false;
   }
 
   reset() {
     this.stop();
-
     this.#generator = null;
   }
 
-  async #generateLoop() {
+  async #loop() {
     const { signal } = this.#abortController;
 
     try {
       while (this.#isRunning && !signal.aborted) {
-        const result = this.#generateBatch(); // Synchronous, no await
+        const data = this.#generator.generate_batch(this.batchSize);
 
-        if (result.found) {
-          this.postMessage({
+        if (data) {
+          this.post({
             type: "found",
-            data: {
-              publicKey: result.data[0],
-              privateKey: result.data[1],
-            },
+            data: { publicKey: data[0], privateKey: data[1] },
           });
-          break;
+          this.stop();
+
+          return;
         }
 
-        this.postMessage({
-          type: "progress",
-          keysGenerated: this.batchSize,
-        });
+        this.post({ type: "progress", keysGenerated: this.batchSize });
       }
-    } catch (error) {
-      if (!signal.aborted) {
-        this.postMessage({
-          type: "error",
-          error: error.message,
-        });
-      }
+    } catch (err) {
+      if (!signal.aborted) this.post({ type: "error", error: err.message });
     }
   }
 
-  #generateBatch() {
-    if (!this.#generator) {
-      throw new Error("Generator not initialised");
-    }
-
-    try {
-      const result = this.#generator.generate_batch(this.batchSize);
-
-      return {
-        found: result !== null && result !== undefined,
-        data: result,
-      };
-    } catch (error) {
-      throw new Error(`Batch generation failed: ${error.message}`);
-    }
-  }
-
-  postMessage(message) {
+  post(message) {
     try {
       self.postMessage(message);
-    } catch (error) {
-      console.error("Failed to post message:", error);
+    } catch (err) {
+      console.error("Failed to post:", err);
     }
   }
 }
 
 const worker = new SSHKeyWorker();
 
-const messageHandlers = {
+const handlers = {
   async init({ config, batchSize }) {
     await worker.initialise(config, batchSize);
-
-    worker.postMessage({
-      type: "initialised",
-      batchSize: worker.batchSize,
-    });
+    worker.post({ type: "init", batchSize: worker.batchSize });
   },
-
-  async start() {
-    await worker.start();
-  },
-
-  stop() {
+  start: () => worker.start(),
+  stop: () => {
     worker.stop();
-    worker.postMessage({ type: "stopped" });
+    worker.post({ type: "stopped" });
   },
-
-  reset() {
+  reset: () => {
     worker.reset();
-    worker.postMessage({ type: "reset" });
+    worker.post({ type: "reset" });
   },
 };
 
-self.addEventListener("message", async (event) => {
-  const { type, ...data } = event.data;
+self.addEventListener("message", async ({ data }) => {
+  const { type, ...payload } = data;
 
   try {
-    const handler = messageHandlers[type];
-    if (!handler) {
-      throw new Error(`Unknown message type: ${type}`);
-    }
+    const handler = handlers[type];
+    if (!handler) throw new Error(`Unknown message type: ${type}`);
 
-    await handler(data);
+    await handler(payload);
   } catch (error) {
-    worker.postMessage({
-      type: "error",
-      error: error.message,
-      stack: error.stack,
-    });
+    worker.post({ type: "error", error: error.message });
   }
 });
 
 self.addEventListener("error", (event) => {
-  worker.postMessage({
+  worker.post({
     type: "error",
     error: event.message || "Unknown worker error",
-    filename: event.filename,
-    lineno: event.lineno,
-    colno: event.colno,
   });
 });
 
 self.addEventListener("unhandledrejection", (event) => {
-  worker.postMessage({
+  worker.post({
     type: "error",
-    error: event.reason?.message || "Unhandled promise rejection",
-    stack: event.reason?.stack,
+    error: event.reason?.message || "Unhandled rejection",
   });
 
   event.preventDefault();

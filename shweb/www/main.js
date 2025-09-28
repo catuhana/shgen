@@ -1,130 +1,89 @@
-import init from "./shweb-wasm/shweb.js";
 import { setWorkerCountToCpuCores } from "./detect-cpu-cores.js";
 
 const STORAGE_KEY = "shweb-settings";
 const UPDATE_INTERVAL = 300;
 const DEFAULT_BATCH_SIZE = 256;
 
+const $ = (selector) => document.querySelector(selector);
+
 const elements = {
-  get keywordsInput() {
-    return document.getElementById("search-keywords");
-  },
-  get workersCountInput() {
-    return document.getElementById("workers-count");
-  },
-  get fieldsSelect() {
-    return document.getElementById("search-in-fields");
-  },
-  get anyKeywordRadio() {
-    return document.getElementById("any-keyword");
-  },
-  get allKeywordsRadio() {
-    return document.getElementById("all-keywords");
-  },
-  get anyFieldRadio() {
-    return document.getElementById("any-field");
-  },
-  get allFieldsRadio() {
-    return document.getElementById("all-fields");
-  },
-  get startBtn() {
-    return (
-      document.querySelector('[data-action="start"]') ||
-      document.querySelector('button[type="button"]:nth-of-type(1)')
-    );
-  },
-  get stopBtn() {
-    return (
-      document.querySelector('[data-action="stop"]') ||
-      document.querySelector('button[type="button"]:nth-of-type(2)')
-    );
-  },
-  get resetBtn() {
-    return (
-      document.querySelector('[data-action="reset"]') ||
-      document.querySelector('button[type="button"]:nth-of-type(3)')
-    );
-  },
-  get statusText() {
-    return document.querySelector(".status-text");
-  },
-  get runningTime() {
-    return document.querySelector(".stat:nth-child(1) .stat-value");
-  },
-  get keysGenerated() {
-    return document.querySelector(".stat:nth-child(2) .stat-value");
-  },
-  get keysPerSec() {
-    return document.querySelector(".stat:nth-child(3) .stat-value");
-  },
-  get publicKeyValue() {
-    return document.querySelector(".key-info:nth-child(1) .key-value code");
-  },
-  get privateKeyValue() {
-    return document.querySelector(".key-info:nth-child(2) .key-value code");
-  },
+  keywordsInput: $("#search-keywords"),
+  workersCountInput: $("#workers-count"),
+  fieldsSelect: $("#search-in-fields"),
+  anyKeywordRadio: $("#any-keyword"),
+  allKeywordsRadio: $("#all-keywords"),
+  anyFieldRadio: $("#any-field"),
+  allFieldsRadio: $("#all-fields"),
+  startButton: $('[data-action="start"]'),
+  stopButton: $('[data-action="stop"]'),
+  resetButton: $('[data-action="reset"]'),
+  statusText: $(".status-text"),
+  runningTime: $(".stat:nth-child(1) .stat-value"),
+  keysGenerated: $(".stat:nth-child(2) .stat-value"),
+  keysPerSec: $(".stat:nth-child(3) .stat-value"),
+  publicKeyValue: $(".key-info:nth-child(1) .key-value code"),
+  privateKeyValue: $(".key-info:nth-child(2) .key-value code"),
 };
 
-class SSHKeyGeneratorApp {
+class Shweb {
   #workers = new Set();
+
   #isGenerating = false;
   #startTime = 0;
   #totalKeysGenerated = 0;
-  #statsUpdateInterval = null;
-  #abortController = null;
+
+  #statsUpdateInterval;
+  #abortController;
 
   constructor() {
-    this.#bindEventListeners();
-    this.#initialise();
+    this.#bindEvents();
+    this.#init();
   }
 
-  async #initialise() {
+  async #init() {
     try {
-      await init();
-
-      elements.startBtn.disabled = false;
+      elements.startButton.disabled = false;
 
       this.#loadSettings();
-      this.#updateStatus("ready");
+      this.#setStatus("ready");
     } catch (error) {
-      console.error("Initialisation failed:", error);
-      this.#updateStatus("error");
+      console.error("Init failed:", error);
+      this.#setStatus("error");
     }
   }
 
-  #bindEventListeners() {
-    elements.startBtn?.addEventListener("click", () => this.start());
-    elements.stopBtn?.addEventListener("click", () => this.stop());
-    elements.resetBtn?.addEventListener("click", () => this.reset());
+  #bindEvents() {
+    elements.startButton?.addEventListener("click", () => this.start());
+    elements.stopButton?.addEventListener("click", () => this.stop());
+    elements.resetButton?.addEventListener("click", () => this.reset());
 
-    const settingsElements = [
-      "keywordsInput",
-      "workersCountInput",
-      "fieldsSelect",
-      "anyKeywordRadio",
-      "allKeywordsRadio",
-      "anyFieldRadio",
-      "allFieldsRadio",
+    const settingsInputs = [
+      elements.keywordsInput,
+      elements.workersCountInput,
+      elements.fieldsSelect,
+      elements.anyKeywordRadio,
+      elements.allKeywordsRadio,
+      elements.anyFieldRadio,
+      elements.allFieldsRadio,
     ];
 
-    settingsElements.forEach((elementKey) => {
-      const element = elements[elementKey];
-      if (element) {
-        const eventType =
-          element.type === "select-multiple" ? "change" : "input";
-        element.addEventListener(eventType, () => this.#saveSettings());
-      }
-    });
+    for (const element of settingsInputs) {
+      if (!element) continue;
 
-    window.addEventListener("beforeunload", () => this.#cleanup());
+      const event = element.type === "select-multiple" ? "change" : "input";
+      element.addEventListener(event, () => this.#saveSettings());
+    }
+
+    window.addEventListener("beforeunload", () => this.stop());
   }
 
-  #updateStatus(status) {
+  #setStatus(status) {
     elements.statusText?.setAttribute("data-status", status);
   }
 
   #formatTime(seconds) {
-    const pad = (num) => Math.floor(num).toString().padStart(2, "0");
+    const pad = (n) => String(Math.floor(n)).padStart(2, "0");
+
     return `${pad(seconds / 3600)}:${pad((seconds % 3600) / 60)}:${pad(
       seconds % 60
     )}`;
@@ -133,70 +92,74 @@ class SSHKeyGeneratorApp {
   #updateStats() {
     if (!this.#isGenerating) return;
 
-    const elapsedSeconds = (performance.now() - this.#startTime) / 1000;
-    const keysPerSec =
-      elapsedSeconds > 0
-        ? Math.round(this.#totalKeysGenerated / elapsedSeconds)
-        : 0;
+    const elapsed = (performance.now() - this.#startTime) / 1000;
+    const rate = elapsed ? Math.round(this.#totalKeysGenerated / elapsed) : 0;
 
-    elements.runningTime.textContent = this.#formatTime(elapsedSeconds);
+    elements.runningTime.textContent = this.#formatTime(elapsed);
     elements.keysGenerated.textContent =
       this.#totalKeysGenerated.toLocaleString();
-    elements.keysPerSec.textContent = keysPerSec.toLocaleString();
+    elements.keysPerSec.textContent = rate.toLocaleString();
   }
 
   #getConfig() {
     const keywords = elements.keywordsInput.value
       .split(",")
-      .map((k) => k.trim())
-      .filter((k) => k.length > 0);
+      .map((keyword) => keyword.trim())
+      .filter(Boolean);
 
-    const fields = Array.from(elements.fieldsSelect.selectedOptions).map(
+    const fields = [...elements.fieldsSelect.selectedOptions].map(
       (option) => option.value
     );
 
     return {
       keywords,
-      fields,
-      all_keywords: elements.allKeywordsRadio.checked,
-      all_fields: elements.allFieldsRadio.checked,
+      search: {
+        fields,
+        matching: {
+          "all-keywords": elements.allKeywordsRadio.checked,
+          "all-fields": elements.allFieldsRadio.checked,
+        },
+      },
     };
   }
 
-  #validateConfig(config) {
-    if (!config.keywords.length) {
-      throw new Error("Please enter at least one keyword");
-    }
-    if (!config.fields.length) {
-      throw new Error("Please select at least one field to search");
-    }
+  #validateConfig({ keywords, search: { fields } }) {
+    if (!keywords.length) throw new Error("Enter at least one keyword");
+    if (!fields.length) throw new Error("Select at least one field");
   }
 
-  #handleWorkerMessage = (event) => {
-    const { type, data, keysGenerated, error } = event.data;
+  #handleWorkerMessage = ({ data, target }) => {
+    const { type, data: payload, keysGenerated, error } = data;
 
     switch (type) {
-      case "initialised":
-        event.target.postMessage({ type: "start" });
+      case "init":
+        target.postMessage({ type: "start" });
         break;
       case "progress":
-        this.#totalKeysGenerated += keysGenerated || 0;
+        this.#totalKeysGenerated += keysGenerated ?? 0;
         break;
       case "found":
         this.stop();
-        this.#displayResult(data);
-        this.#updateStatus("match found");
+
+        this.#showResult(payload);
+        this.#setStatus("match found");
+
         break;
       case "error":
         console.error("Worker error:", error);
-        this.#updateStatus("error");
+        this.#setStatus("error");
+
         break;
       case "stopped":
+        if (this.#isGenerating) this.stop();
+        break;
+      case "reset":
+        if (this.#isGenerating || this.#totalKeysGenerated > 0) this.reset();
         break;
     }
   };
 
-  #displayResult({ publicKey, privateKey }) {
+  #showResult({ publicKey, privateKey }) {
     elements.publicKeyValue.textContent = publicKey || "Error loading key";
     elements.privateKeyValue.textContent = privateKey || "Error loading key";
   }
@@ -216,54 +179,50 @@ class SSHKeyGeneratorApp {
       this.#totalKeysGenerated = 0;
       this.#abortController = new AbortController();
 
-      elements.publicKeyValue.textContent = "...";
-      elements.privateKeyValue.textContent = "...";
+      elements.publicKeyValue.textContent =
+        elements.privateKeyValue.textContent = "...";
+      elements.startButton.disabled = true;
+      elements.stopButton.disabled = false;
 
-      elements.startBtn.disabled = true;
-      elements.stopBtn.disabled = false;
-      this.#updateStatus("running");
+      this.#setStatus("running");
 
-      await this.#createWorkers(workerCount, config);
+      await this.#spawnWorkers(workerCount, config);
 
       this.#statsUpdateInterval = setInterval(
         () => this.#updateStats(),
         UPDATE_INTERVAL
       );
       this.#updateStats();
-    } catch (error) {
-      console.error("Start failed:", error);
-      this.#updateStatus("error");
-      elements.startBtn.disabled = false;
+    } catch (err) {
+      console.error("Start failed:", err);
+      this.#setStatus("error");
+
+      elements.startButton.disabled = false;
     }
   }
 
-  async #createWorkers(workerCount, config) {
-    const workerPromises = Array.from({ length: workerCount }, async () => {
-      if (this.#abortController?.signal.aborted) return null;
+  async #spawnWorkers(count, config) {
+    const tasks = Array.from({ length: count }, async () => {
+      if (this.#abortController?.signal.aborted) return;
 
-      try {
-        const worker = new Worker("./worker.js", { type: "module" });
-        worker.onmessage = this.#handleWorkerMessage;
-        worker.onerror = (error) => {
-          console.error("Worker error:", error);
-          this.#updateStatus("error");
-        };
+      const worker = new Worker("./worker.js", { type: "module" });
+      worker.onmessage = this.#handleWorkerMessage;
+      worker.onerror = (error) => {
+        console.error("Worker error:", error);
 
-        worker.postMessage({
-          type: "init",
-          config,
-          batchSize: DEFAULT_BATCH_SIZE,
-        });
+        this.#setStatus("error");
+        this.stop();
+      };
 
-        this.#workers.add(worker);
-        return worker;
-      } catch (error) {
-        console.error("Worker creation failed:", error);
-        throw error;
-      }
+      worker.postMessage({
+        type: "init",
+        config,
+        batchSize: DEFAULT_BATCH_SIZE,
+      });
+      this.#workers.add(worker);
     });
 
-    await Promise.all(workerPromises);
+    await Promise.all(tasks);
   }
 
   stop() {
@@ -272,21 +231,19 @@ class SSHKeyGeneratorApp {
     this.#isGenerating = false;
     this.#abortController?.abort();
 
-    elements.startBtn.disabled = false;
-    elements.stopBtn.disabled = true;
+    elements.startButton.disabled = false;
+    elements.stopButton.disabled = true;
 
-    this.#workers.forEach((worker) => {
+    for (const worker of this.#workers) {
       worker.postMessage({ type: "stop" });
       worker.terminate();
-    });
+    }
     this.#workers.clear();
 
-    if (this.#statsUpdateInterval) {
-      clearInterval(this.#statsUpdateInterval);
-      this.#statsUpdateInterval = null;
-    }
+    clearInterval(this.#statsUpdateInterval);
+    this.#statsUpdateInterval = null;
 
-    this.#updateStatus("pending");
+    this.#setStatus("ready");
   }
 
   reset() {
@@ -296,79 +253,55 @@ class SSHKeyGeneratorApp {
     setWorkerCountToCpuCores();
 
     this.#totalKeysGenerated = 0;
+
     elements.runningTime.textContent = "00:00:00";
     elements.keysGenerated.textContent = "0";
     elements.keysPerSec.textContent = "0";
+    elements.publicKeyValue.textContent = elements.privateKeyValue.textContent =
+      "...";
 
-    elements.publicKeyValue.textContent = "...";
-    elements.privateKeyValue.textContent = "...";
+    elements.anyKeywordRadio.checked = elements.allFieldsRadio.checked = true;
+    elements.allKeywordsRadio.checked = elements.anyFieldRadio.checked = false;
 
-    this.#updateStatus("pending");
-    this.#clearSettings();
+    this.#setStatus("ready");
+
+    localStorage.removeItem(STORAGE_KEY);
   }
 
   #saveSettings() {
-    try {
-      const settings = {
-        keywords: elements.keywordsInput.value,
-        workersCount: elements.workersCountInput.value,
-        fields: Array.from(elements.fieldsSelect.selectedOptions).map(
-          (o) => o.value
-        ),
-        keywordMatching: elements.allKeywordsRadio.checked ? "all" : "any",
-        fieldMatching: elements.allFieldsRadio.checked ? "all" : "any",
-      };
+    const settings = {
+      keywords: elements.keywordsInput.value,
+      workersCount: elements.workersCountInput.value,
+      fields: [...elements.fieldsSelect.selectedOptions].map((o) => o.value),
+      keywordMatching: elements.allKeywordsRadio.checked ? "all" : "any",
+      fieldMatching: elements.allFieldsRadio.checked ? "all" : "any",
+    };
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    } catch (error) {
-      console.warn("Failed to save settings:", error);
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }
 
   #loadSettings() {
-    try {
-      const settings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-      if (!settings) return;
+    const settings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    if (!settings) return;
 
-      elements.keywordsInput.value = settings.keywords || "";
-      elements.workersCountInput.value =
-        settings.workersCount || elements.workersCountInput.value;
+    elements.keywordsInput.value = settings.keywords ?? "";
+    elements.workersCountInput.value =
+      settings.workersCount ?? elements.workersCountInput.value;
 
-      Array.from(elements.fieldsSelect.options).forEach((option) => {
-        option.selected = settings.fields?.includes(option.value) || false;
-      });
-
-      const keywordRadios =
-        settings.keywordMatching === "all"
-          ? [elements.allKeywordsRadio, elements.anyKeywordRadio]
-          : [elements.anyKeywordRadio, elements.allKeywordsRadio];
-
-      keywordRadios[0].checked = true;
-      keywordRadios[1].checked = false;
-
-      const fieldRadios =
-        settings.fieldMatching === "all"
-          ? [elements.allFieldsRadio, elements.anyFieldRadio]
-          : [elements.anyFieldRadio, elements.allFieldsRadio];
-
-      fieldRadios[0].checked = true;
-      fieldRadios[1].checked = false;
-    } catch (error) {
-      console.warn("Failed to load settings:", error);
+    for (const opt of elements.fieldsSelect.options) {
+      opt.selected = settings.fields?.includes(opt.value) ?? false;
     }
-  }
 
-  #clearSettings() {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-      console.warn("Failed to clear settings:", error);
-    }
-  }
+    (settings.keywordMatching === "all"
+      ? elements.allKeywordsRadio
+      : elements.anyKeywordRadio
+    ).checked = true;
 
-  #cleanup() {
-    this.stop();
+    (settings.fieldMatching === "all"
+      ? elements.allFieldsRadio
+      : elements.anyFieldRadio
+    ).checked = true;
   }
 }
 
-new SSHKeyGeneratorApp();
+new Shweb();
