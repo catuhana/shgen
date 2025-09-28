@@ -4,7 +4,7 @@ pub mod output;
 pub mod runtime;
 pub mod search;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Config {
     pub keywords: Vec<String>,
     #[serde(default)]

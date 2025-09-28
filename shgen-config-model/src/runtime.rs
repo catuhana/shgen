@@ -2,7 +2,7 @@
 
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(default, rename_all = "kebab-case")]
 pub struct Config {
     pub threads: usize,

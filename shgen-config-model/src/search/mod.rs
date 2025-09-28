@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 pub mod matching;
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(default)]
 pub struct Config {
     pub fields: Vec<SearchFields>,
