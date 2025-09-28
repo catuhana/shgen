@@ -22,7 +22,7 @@ clean-dist:
 clean-dist:
   if (Test-Path "{{dist}}") { Remove-Item -Recurse -Force "{{dist}}" }
 
-build-wasm $RUSTFLAGS='--cfg getrandom_backend="wasm_js"': clean-wasm
+build-wasm $RUSTFLAGS='-Ctarget-feature=+simd128,+relaxed-simd,+sign-ext,+tail-call --cfg getrandom_backend="wasm_js"': clean-wasm
   wasm-pack build --target web --release --out-dir "{{wasm}}"
 
 [unix]
