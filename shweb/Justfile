@@ -29,7 +29,7 @@ build-wasm $RUSTFLAGS='-Ctarget-feature=+simd128,+relaxed-simd,+sign-ext,+tail-c
 build: clean build-wasm
   mkdir -p "{{dist}}"
 
-  cp "{{www}}/*" "{{dist}}"
+  cp -r "{{www}}"/* "{{dist}}"
 
 [windows]
 build: clean build-wasm
