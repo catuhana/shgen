@@ -54,7 +54,8 @@ jobs:
         run: |
           cargo install just \
             wasm-pack \
-              --locked
+              --locked \
+              --force
 
       - name: Build shweb
         run: just shweb::build
