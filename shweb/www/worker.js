@@ -1,9 +1,15 @@
 import init, { Generator } from "./shweb-wasm/shweb.js";
 
 class SSHKeyWorker {
+  /**
+   * @type {Generator | null}
+   */
   #generator;
 
   #isRunning = false;
+  /**
+   * @type {AbortController | null}
+   */
   #abortController;
 
   batchSize;

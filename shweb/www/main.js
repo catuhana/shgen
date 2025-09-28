@@ -32,7 +32,13 @@ class Shweb {
   #startTime = 0;
   #totalKeysGenerated = 0;
 
+  /**
+   * @type {number | null}
+   */
   #statsUpdateInterval;
+  /**
+   * @type {AbortController | null}
+   */
   #abortController;
 
   constructor() {
