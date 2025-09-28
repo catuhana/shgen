@@ -1,4 +1,4 @@
-@import url(//cdn.jsdelivr.net/npm/@catppuccin/palette@1.7.1/css/catppuccin.css);
+@import url("colour-scheme.css");
 
 * {
   margin: 0;
@@ -14,8 +14,8 @@
 body {
   font-family: "Google Sans Code", monospace;
 
-  color: var(--ctp-mocha-text);
-  background-color: var(--ctp-mocha-base);
+  color: var(--ctp-text);
+  background-color: var(--ctp-base);
 
   padding: 2rem;
 }
@@ -44,9 +44,9 @@ main {
 }
 
 div.settings {
-  background-color: var(--ctp-mocha-surface0);
+  background-color: var(--ctp-surface0);
 
-  border: 1px solid var(--ctp-mocha-surface1);
+  border: 1px solid var(--ctp-surface1);
   border-radius: 0.5rem;
 
   padding: 1rem;
@@ -62,7 +62,7 @@ label.setting-label {
 
   margin-bottom: 0.25rem;
 
-  color: var(--ctp-mocha-subtext1);
+  color: var(--ctp-subtext1);
 
   font-size: 0.875rem;
 
@@ -74,7 +74,7 @@ span.cpu-cores-helper-text {
 
   margin-top: 0.15rem;
 
-  color: var(--ctp-mocha-overlay1);
+  color: var(--ctp-overlay1);
 
   font-size: 0.75rem;
   font-style: italic;
@@ -90,17 +90,17 @@ select {
 
   padding-left: 0.45rem;
 
-  color: var(--ctp-mocha-text);
-  background-color: var(--ctp-mocha-base);
+  color: var(--ctp-text);
+  background-color: var(--ctp-base);
 
-  border: 1px solid var(--ctp-mocha-surface2);
+  border: 1px solid var(--ctp-surface2);
   border-radius: 0.2rem;
 
   transition: border-color 0.2s;
 
   &:focus {
     outline: none;
-    border-color: var(--ctp-mocha-mauve);
+    border-color: var(--ctp-mauve);
   }
 }
 
@@ -112,14 +112,14 @@ select.setting-select {
   scrollbar-width: thin;
 
   option {
-    color: var(--ctp-mocha-text);
-    background-color: var(--ctp-mocha-base);
+    color: var(--ctp-text);
+    background-color: var(--ctp-base);
 
     padding: 0.7rem 0.45rem;
 
     &:checked {
-      color: var(--ctp-mocha-base);
-      background-color: var(--ctp-mocha-lavender);
+      color: var(--ctp-base);
+      background-color: var(--ctp-lavender);
     }
   }
 }
@@ -127,9 +127,9 @@ select.setting-select {
 div.button-group {
   display: flex;
 
-  background-color: var(--ctp-mocha-base);
+  background-color: var(--ctp-base);
 
-  border: 1px solid var(--ctp-mocha-surface2);
+  border: 1px solid var(--ctp-surface2);
   border-radius: 0.2rem;
 
   /* Bad for accessibility,
@@ -154,8 +154,8 @@ div.button-group {
     }
 
     &:has(input[type="radio"]:checked) {
-      color: var(--ctp-mocha-base);
-      background-color: var(--ctp-mocha-lavender);
+      color: var(--ctp-base);
+      background-color: var(--ctp-lavender);
     }
 
     label.button-group-button-label {
@@ -183,8 +183,8 @@ div.control-buttons {
     flex: 1;
 
     &:first-child {
-      color: var(--ctp-mocha-base);
-      background-color: var(--ctp-mocha-lavender);
+      color: var(--ctp-base);
+      background-color: var(--ctp-lavender);
     }
   }
 }
@@ -196,17 +196,17 @@ button[type="button"] {
 
   padding: 0 1.25rem;
 
-  color: var(--ctp-mocha-text);
-  background-color: var(--ctp-mocha-base);
+  color: var(--ctp-text);
+  background-color: var(--ctp-base);
 
-  border: 1px solid var(--ctp-mocha-surface2);
+  border: 1px solid var(--ctp-surface2);
   border-radius: 0.3rem;
 
   cursor: pointer;
 
   &:focus {
     outline: none;
-    border-color: var(--ctp-mocha-mauve);
+    border-color: var(--ctp-mauve);
   }
 }
 
@@ -218,11 +218,11 @@ div.results {
 div.stats {
   display: flex;
 
-  background-color: var(--ctp-mocha-surface0);
+  background-color: var(--ctp-surface0);
 
   padding: 1rem;
 
-  border: 1px solid var(--ctp-mocha-surface1);
+  border: 1px solid var(--ctp-surface1);
   border-radius: 0.5rem;
 
   div.stat {
@@ -233,14 +233,14 @@ div.stats {
     span.stat-value {
       display: block;
 
-      color: var(--ctp-mocha-lavender);
+      color: var(--ctp-lavender);
 
       font-size: large;
       font-weight: 600;
     }
 
     span.stat-label {
-      color: var(--ctp-mocha-overlay1);
+      color: var(--ctp-overlay1);
 
       font-size: small;
 
@@ -250,11 +250,11 @@ div.stats {
 }
 
 div.found-result {
-  background: var(--ctp-mocha-surface0);
+  background: var(--ctp-surface0);
 
   padding: 1rem;
 
-  border: 1px solid var(--ctp-mocha-surface1);
+  border: 1px solid var(--ctp-surface1);
   border-radius: 0.5rem;
 
   div.status {
@@ -262,11 +262,11 @@ div.found-result {
       margin: 0.5rem 0;
 
       border: none;
-      border-bottom: 1px solid var(--ctp-mocha-surface2);
+      border-bottom: 1px solid var(--ctp-surface2);
     }
 
     span.status-text {
-      color: var(--ctp-mocha-green);
+      color: var(--ctp-green);
 
       font-size: 0.875rem;
 
@@ -277,19 +277,19 @@ div.found-result {
       }
 
       &[data-status="error"] {
-        color: var(--ctp-mocha-red);
+        color: var(--ctp-red);
       }
 
       &[data-status="ready"] {
-        color: var(--ctp-mocha-blue);
+        color: var(--ctp-blue);
       }
 
       &[data-status="running"] {
-        color: var(--ctp-mocha-rosewater);
+        color: var(--ctp-rosewater);
       }
 
       &[data-status="match found"] {
-        color: var(--ctp-mocha-green);
+        color: var(--ctp-green);
       }
     }
   }
@@ -307,7 +307,7 @@ div.found-result {
 
         margin-bottom: 0.25rem;
 
-        color: var(--ctp-mocha-overlay1);
+        color: var(--ctp-overlay1);
 
         font-size: small;
 
@@ -317,10 +317,10 @@ div.found-result {
       div.key-value {
         padding: 0.5rem;
 
-        color: var(--ctp-mocha-text);
-        background-color: var(--ctp-mocha-base);
+        color: var(--ctp-text);
+        background-color: var(--ctp-base);
 
-        border: 1px solid var(--ctp-mocha-surface2);
+        border: 1px solid var(--ctp-surface2);
         border-radius: 0.3rem;
 
         word-break: break-all;

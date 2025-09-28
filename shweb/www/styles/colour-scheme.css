@@ -1,0 +1,43 @@
+@import url(//cdn.jsdelivr.net/npm/@catppuccin/palette@1.7.1/css/catppuccin.css);
+
+@layer colour-scheme {
+  :root {
+    --ctp-text: light-dark(var(--ctp-latte-text), var(--ctp-mocha-text));
+    --ctp-base: light-dark(var(--ctp-latte-base), var(--ctp-mocha-base));
+
+    --ctp-surface0: light-dark(
+      var(--ctp-latte-surface0),
+      var(--ctp-mocha-surface0)
+    );
+    --ctp-surface1: light-dark(
+      var(--ctp-latte-surface1),
+      var(--ctp-mocha-surface1)
+    );
+    --ctp-surface2: light-dark(
+      var(--ctp-latte-surface2),
+      var(--ctp-mocha-surface2)
+    );
+
+    --ctp-subtext1: light-dark(
+      var(--ctp-latte-subtext1),
+      var(--ctp-mocha-subtext1)
+    );
+    --ctp-overlay1: light-dark(
+      var(--ctp-latte-overlay1),
+      var(--ctp-mocha-overlay1)
+    );
+
+    --ctp-mauve: light-dark(var(--ctp-latte-mauve), var(--ctp-mocha-mauve));
+    --ctp-lavender: light-dark(
+      var(--ctp-latte-lavender),
+      var(--ctp-mocha-lavender)
+    );
+    --ctp-red: light-dark(var(--ctp-latte-red), var(--ctp-mocha-red));
+    --ctp-green: light-dark(var(--ctp-latte-green), var(--ctp-mocha-green));
+    --ctp-blue: light-dark(var(--ctp-latte-blue), var(--ctp-mocha-blue));
+    --ctp-rosewater: light-dark(
+      var(--ctp-latte-rosewater),
+      var(--ctp-mocha-rosewater)
+    );
+  }
+}
