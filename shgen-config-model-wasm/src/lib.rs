@@ -1,3 +1,7 @@
+// We can't make functions `const`
+// because of `wasm-bindgen`.
+#![allow(clippy::missing_const_for_fn)]
+
 use wasm_bindgen::prelude::*;
 
 pub mod search;
