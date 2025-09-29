@@ -3,7 +3,10 @@ use rand_chacha::{
     ChaCha8Rng,
     rand_core::{RngCore, SeedableRng},
 };
-use shgen_config_model_wasm::Config;
+use shgen_config_model_wasm::{
+    Config,
+    search::{SearchConfig, SearchFields, matching::MatchingConfig},
+};
 use shgen_keys::{matcher::Matcher, openssh_format::OpenSSHFormatter};
 use wasm_bindgen::prelude::*;
 
@@ -16,7 +19,16 @@ pub struct Generator {
 #[wasm_bindgen]
 impl Generator {
     #[wasm_bindgen(constructor)]
-    pub fn new(config: Config) -> Self {
+    pub fn new(
+        keywords: Vec<String>,
+        fields: Vec<SearchFields>,
+        all_keywords: bool,
+        all_fields: bool,
+    ) -> Self {
+        let matching_config = MatchingConfig::new(all_keywords, all_fields);
+        let search_config = SearchConfig::new(fields, matching_config);
+        let config = Config::new(keywords, search_config);
+
         let matcher = Matcher::new(config.keywords(), config.search().inner());
 
         let mut seed = [0u8; 32];

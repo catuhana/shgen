@@ -1,4 +1,4 @@
-import init, { Generator } from "../shweb-wasm/shweb.js";
+import init, { Generator, SearchFields } from "../shweb-wasm/shweb.js";
 
 class SSHKeyWorker {
   /**
@@ -23,7 +23,22 @@ class SSHKeyWorker {
 
     await init();
 
-    this.#generator = new Generator(config);
+    const fieldMap = {
+      "private-key": SearchFields.PrivateKey,
+      "public-key": SearchFields.PublicKey,
+      "sha1-fingerprint": SearchFields.Sha1Fingerprint,
+      "sha256-fingerprint": SearchFields.Sha256Fingerprint,
+      "sha384-fingerprint": SearchFields.Sha384Fingerprint,
+      "sha512-fingerprint": SearchFields.Sha512Fingerprint,
+    };
+    const fields = config.search.fields.map((field) => fieldMap[field]);
+
+    this.#generator = new Generator(
+      config.keywords,
+      fields,
+      config.search.matching["all-keywords"],
+      config.search.matching["all-fields"]
+    );
     this.batchSize = batchSize;
 
     return { success: true, batchSize: this.batchSize };
