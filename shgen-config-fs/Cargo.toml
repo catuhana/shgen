@@ -1,9 +1,0 @@
-[package]
-name = "shgen-config-fs"
-version.workspace = true
-edition.workspace = true
-
-[dependencies]
-figment = { version = "0.10.19", features = ["yaml"] }
-shgen-config-model-native = { path = "../shgen-config-model-native" }
-shgen-core = { path = "../shgen-core" }

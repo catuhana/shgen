@@ -2,7 +2,6 @@
 resolver = "3"
 members = [
   "shgen",
-  "shgen-config-fs",
   "shgen-config-model-core",
   "shgen-config-model-native",
   "shgen-config-model-wasm",

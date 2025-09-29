@@ -4,7 +4,13 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+figment = { version = "0.10.19", features = ["yaml"], optional = true }
 serde.workspace = true
+shgen-core = { path = "../shgen-core", optional = true }
 shgen-config-model-core = { path = "../shgen-config-model-core", features = [
   "serde",
 ] }
+
+[features]
+default = []
+fs = ['dep:figment', "dep:shgen-core"]

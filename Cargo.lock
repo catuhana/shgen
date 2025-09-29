@@ -571,20 +571,10 @@ dependencies = [
  "mimalloc",
  "rand",
  "rand_chacha",
- "shgen-config-fs",
  "shgen-config-model-native",
  "shgen-core",
  "shgen-keep-awake",
  "shgen-key-utils",
-]
-
-[[package]]
-name = "shgen-config-fs"
-version = "0.0.0"
-dependencies = [
- "figment",
- "shgen-config-model-native",
- "shgen-core",
 ]
 
 [[package]]
@@ -598,8 +588,10 @@ dependencies = [
 name = "shgen-config-model-native"
 version = "0.0.0"
 dependencies = [
+ "figment",
  "serde",
  "shgen-config-model-core",
+ "shgen-core",
 ]
 
 [[package]]
