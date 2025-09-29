@@ -74,10 +74,10 @@ fn main() {
             let elapsed_since_last = now.duration_since(last_check_time);
 
             let generated_keys = KEYS_COUNTER.load(Ordering::Relaxed);
-            
+
             let keys_since_last = generated_keys - last_keys_count;
             let instant_rate = keys_since_last as f64 / elapsed_since_last.as_secs_f64();
-            
+
             let overall_rate = generated_keys as f64 / elapsed_total.as_secs_f64();
 
             let formatted_elapsed = format!(
@@ -86,18 +86,17 @@ fn main() {
                 (elapsed_total.as_secs() % 3600) / 60,
                 elapsed_total.as_secs() % 60
             );
-            
+
             print!(
                 "\r\x1b[K[{formatted_elapsed}] {generated_keys} keys @ {overall_rate:.0} keys/s avg. @ {instant_rate:.0} keys/s inst."
             );
             let _ = std::io::stdout().flush();
-            
+
             last_keys_count = generated_keys;
             last_check_time = now;
         }
     })
     .expect("failed to spawn status thread");
-
 
     // Kind of hacky I guess?
     if let Some(ref mut keep_awake) = keep_awake {
