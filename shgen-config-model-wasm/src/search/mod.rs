@@ -21,6 +21,7 @@ impl SearchConfig {
 }
 
 impl SearchConfig {
+    #[must_use]
     pub fn inner(self) -> shgen_config_model_core::search::Config {
         self.0
     }

@@ -19,6 +19,7 @@ pub struct Generator {
 #[wasm_bindgen]
 impl Generator {
     #[wasm_bindgen(constructor)]
+    #[must_use]
     pub fn new(
         keywords: Vec<String>,
         fields: Vec<SearchFields>,
