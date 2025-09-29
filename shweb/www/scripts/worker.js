@@ -1,4 +1,4 @@
-import init, { Generator } from "./shweb-wasm/shweb.js";
+import init, { Generator } from "../shweb-wasm/shweb.js";
 
 class SSHKeyWorker {
   /**
@@ -74,16 +74,16 @@ class SSHKeyWorker {
 
         this.post({ type: "progress", keysGenerated: this.batchSize });
       }
-    } catch (err) {
-      if (!signal.aborted) this.post({ type: "error", error: err.message });
+    } catch (error) {
+      if (!signal.aborted) this.post({ type: "error", error: error.message });
     }
   }
 
   post(message) {
     try {
       self.postMessage(message);
-    } catch (err) {
-      console.error("Failed to post:", err);
+    } catch (error) {
+      console.error("Failed to post:", error);
     }
   }
 }

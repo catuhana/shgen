@@ -211,13 +211,15 @@ class Shweb {
     const tasks = Array.from({ length: count }, async () => {
       if (this.#abortController?.signal.aborted) return;
 
-      const worker = new Worker("./worker.js", { type: "module" });
+      const worker = new Worker(new URL("./worker.js", import.meta.url), {
+        type: "module",
+      });
       worker.onmessage = this.#handleWorkerMessage;
       worker.onerror = (error) => {
         console.error("Worker error:", error);
 
-        this.#setStatus("error");
         this.stop();
+        this.#setStatus("error");
       };
 
       worker.postMessage({

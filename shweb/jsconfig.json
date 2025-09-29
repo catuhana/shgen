@@ -2,6 +2,7 @@
   "compilerOptions": {
     "lib": ["ESNext", "DOM"],
     "target": "esnext",
+    "module": "esnext",
     "checkJs": true
   }
 }
