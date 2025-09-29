@@ -31,12 +31,12 @@ impl Generator {
 
     #[wasm_bindgen]
     pub fn generate_batch(&mut self, batch_size: usize) -> JsValue {
-        let mut secret_keys = vec![0u8; 32 * batch_size];
-        self.rng.fill_bytes(&mut secret_keys);
+        let mut secret_key = [0u8; 32];
 
-        let (secret_keys_chunks, _) = secret_keys.as_chunks::<32>();
-        for secret_key in secret_keys_chunks {
-            let signing_key = SigningKey::from_bytes(secret_key);
+        for _ in 0..batch_size {
+            self.rng.fill_bytes(&mut secret_key);
+
+            let signing_key = SigningKey::from_bytes(&secret_key);
             let mut formatter = OpenSSHFormatter::new(signing_key, &mut self.rng);
 
             if let Some((public_key, private_key)) = self.matcher.search_matches(&mut formatter) {
