@@ -29,7 +29,7 @@ impl Generator {
         }
     }
 
-    #[wasm_bindgen]
+    #[wasm_bindgen(js_name = generateBatch)]
     pub fn generate_batch(&mut self, batch_size: usize) -> JsValue {
         let mut secret_key = [0u8; 32];
 

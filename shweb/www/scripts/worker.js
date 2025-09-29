@@ -60,7 +60,7 @@ class SSHKeyWorker {
 
     try {
       while (this.#isRunning && !signal.aborted) {
-        const data = this.#generator.generate_batch(this.batchSize);
+        const data = this.#generator.generateBatch(this.batchSize);
 
         if (data) {
           this.post({
