@@ -1,5 +1,5 @@
 [package]
-name = "shgen-keys"
+name = "shgen-key-utils"
 version.workspace = true
 edition.workspace = true
 

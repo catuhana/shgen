@@ -7,7 +7,7 @@ use shgen_config_model_wasm::{
     Config,
     search::{SearchConfig, SearchFields, matching::MatchingConfig},
 };
-use shgen_keys::{matcher::Matcher, openssh_format::OpenSSHFormatter};
+use shgen_key_utils::{matcher::Matcher, openssh_format::OpenSSHFormatter};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]

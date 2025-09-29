@@ -8,7 +8,7 @@ members = [
   "shgen-config-model-wasm",
   "shgen-core",
   "shgen-keep-awake",
-  "shgen-keys",
+  "shgen-key-utils",
   "shweb",
 ]
 

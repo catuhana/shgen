@@ -575,7 +575,7 @@ dependencies = [
  "shgen-config-model-native",
  "shgen-core",
  "shgen-keep-awake",
- "shgen-keys",
+ "shgen-key-utils",
 ]
 
 [[package]]
@@ -622,7 +622,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "shgen-keys"
+name = "shgen-key-utils"
 version = "0.0.0"
 dependencies = [
  "aho-corasick",
@@ -652,7 +652,7 @@ dependencies = [
  "js-sys",
  "rand_chacha",
  "shgen-config-model-wasm",
- "shgen-keys",
+ "shgen-key-utils",
  "wasm-bindgen",
 ]
 
