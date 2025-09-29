@@ -1,0 +1,8 @@
+[package]
+name = "shgen-config-model-wasm"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+shgen-config-model-core = { path = "../shgen-config-model-core" }
+wasm-bindgen.workspace = true

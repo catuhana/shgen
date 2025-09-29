@@ -11,7 +11,7 @@ use std::{
 };
 
 use shgen_config_fs::{ConfigExt as _, output::ConfigExt as _};
-use shgen_config_model::Config;
+use shgen_config_model_native::Config;
 use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
 use shgen_keep_awake::KeepAwake;
 
@@ -40,7 +40,7 @@ fn main() {
 
     let mut worker_handles = Vec::with_capacity(config.runtime.threads);
     for thread_id in 0..config.runtime.threads {
-        let matcher = Matcher::new(config.keywords.clone(), config.search.clone());
+        let matcher = Matcher::new(config.shared.keywords.clone(), config.shared.search.clone());
 
         worker_handles.push(
             std::thread::Builder::new()

@@ -1,0 +1,10 @@
+[package]
+name = "shgen-config-model-native"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+serde.workspace = true
+shgen-config-model-core = { path = "../shgen-config-model-core", features = [
+  "serde",
+] }

@@ -13,7 +13,7 @@ pub trait ConfigExt: Sized {
     fn generate_config_overview(&self) -> String;
 }
 
-impl ConfigExt for shgen_config_model::Config {
+impl ConfigExt for shgen_config_model_native::Config {
     fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>> {
         Figment::new()
             .merge(if let Some(path) = config_path {
@@ -40,14 +40,15 @@ impl ConfigExt for shgen_config_model::Config {
              Keep awake: {}\n\
              Set affinity: {}\n\
              Save folder: {}",
-            self.keywords,
-            self.search
+            self.shared.keywords,
+            self.shared
+                .search
                 .fields
                 .iter()
                 .map(|field| format!("{field:?}"))
                 .collect::<Vec<String>>(),
-            self.search.matching.all_keywords,
-            self.search.matching.all_fields,
+            self.shared.search.matching.all_keywords,
+            self.shared.search.matching.all_fields,
             self.runtime.threads,
             self.runtime.keep_awake,
             self.runtime.pin_threads,

@@ -1,7 +1,9 @@
-use serde::Deserialize;
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(default, rename_all = "kebab-case")]
+#[derive(Clone, Debug)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(default, rename_all = "kebab-case")
+)]
 pub struct Config {
     pub all_keywords: bool,
     pub all_fields: bool,

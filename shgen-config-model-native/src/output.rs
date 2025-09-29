@@ -1,10 +1,6 @@
-#![cfg(not(feature = "wasm-js"))]
-
 use std::path::PathBuf;
 
-use serde::Deserialize;
-
-#[derive(Debug, Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 #[serde(default, rename_all = "kebab-case")]
 pub struct Config {
     pub save_to: PathBuf,

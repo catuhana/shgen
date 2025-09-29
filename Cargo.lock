@@ -497,17 +497,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde-wasm-bindgen"
-version = "0.6.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8302e169f0eddcc139c70f139d19d6467353af16f9fce27e8c30158036a1e16b"
-dependencies = [
- "js-sys",
- "serde",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "serde_core"
 version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -583,7 +572,7 @@ dependencies = [
  "rand",
  "rand_chacha",
  "shgen-config-fs",
- "shgen-config-model",
+ "shgen-config-model-native",
  "shgen-core",
  "shgen-keep-awake",
  "shgen-keys",
@@ -594,16 +583,31 @@ name = "shgen-config-fs"
 version = "0.0.0"
 dependencies = [
  "figment",
- "shgen-config-model",
+ "shgen-config-model-native",
  "shgen-core",
 ]
 
 [[package]]
-name = "shgen-config-model"
+name = "shgen-config-model-core"
 version = "0.0.0"
 dependencies = [
  "serde",
- "shgen-core",
+]
+
+[[package]]
+name = "shgen-config-model-native"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "shgen-config-model-core",
+]
+
+[[package]]
+name = "shgen-config-model-wasm"
+version = "0.0.0"
+dependencies = [
+ "shgen-config-model-core",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -628,7 +632,7 @@ dependencies = [
  "rand_chacha",
  "sha1",
  "sha2 0.10.9",
- "shgen-config-model",
+ "shgen-config-model-core",
  "shgen-core",
 ]
 
@@ -645,9 +649,9 @@ dependencies = [
  "console_error_panic_hook",
  "ed25519-dalek",
  "getrandom",
+ "js-sys",
  "rand_chacha",
- "serde-wasm-bindgen",
- "shgen-config-model",
+ "shgen-config-model-wasm",
  "shgen-keys",
  "wasm-bindgen",
 ]

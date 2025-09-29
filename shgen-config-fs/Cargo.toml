@@ -5,5 +5,5 @@ edition.workspace = true
 
 [dependencies]
 figment = { version = "0.10.19", features = ["yaml"] }
-shgen-config-model = { path = "../shgen-config-model" }
+shgen-config-model-native = { path = "../shgen-config-model-native" }
 shgen-core = { path = "../shgen-core" }

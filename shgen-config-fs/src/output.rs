@@ -4,7 +4,7 @@ pub trait ConfigExt {
     fn save_keys(&self, public_key: &OpenSSHPublicKey, private_key: &OpenSSHPrivateKey);
 }
 
-impl ConfigExt for shgen_config_model::output::Config {
+impl ConfigExt for shgen_config_model_native::output::Config {
     fn save_keys(&self, public_key: &OpenSSHPublicKey, private_key: &OpenSSHPrivateKey) {
         let save_dir = &self.save_to;
 

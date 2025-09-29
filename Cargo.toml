@@ -3,7 +3,9 @@ resolver = "3"
 members = [
   "shgen",
   "shgen-config-fs",
-  "shgen-config-model",
+  "shgen-config-model-core",
+  "shgen-config-model-native",
+  "shgen-config-model-wasm",
   "shgen-core",
   "shgen-keep-awake",
   "shgen-keys",
@@ -19,6 +21,7 @@ ed25519-dalek = { version = "3.0.0-pre.1", default-features = false }
 rand = "0.9.2"
 rand_chacha = "0.9.0"
 serde = "1.0.228"
+wasm-bindgen = "0.2.104"
 
 [profile.release]
 lto = "thin"

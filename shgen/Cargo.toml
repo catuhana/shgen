@@ -10,7 +10,7 @@ gdt-cpus = "25.5.0"
 rand.workspace = true
 rand_chacha.workspace = true
 shgen-config-fs = { path = "../shgen-config-fs" }
-shgen-config-model = { path = "../shgen-config-model" }
+shgen-config-model-native = { path = "../shgen-config-model-native" }
 shgen-core = { path = "../shgen-core" }
 shgen-keep-awake = { path = "../shgen-keep-awake" }
 shgen-keys = { path = "../shgen-keys" }

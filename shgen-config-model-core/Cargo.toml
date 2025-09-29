@@ -1,0 +1,11 @@
+[package]
+name = "shgen-config-model-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+serde = { workspace = true, features = ["derive"], optional = true }
+
+[features]
+default = []
+serde = ["dep:serde"]

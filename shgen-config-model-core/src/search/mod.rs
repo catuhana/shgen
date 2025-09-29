@@ -1,9 +1,7 @@
-use serde::Deserialize;
-
 pub mod matching;
 
-#[derive(Clone, Debug, Deserialize)]
-#[serde(default)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize), serde(default))]
 pub struct Config {
     pub fields: Vec<SearchFields>,
     pub matching: matching::Config,
@@ -18,8 +16,12 @@ impl Default for Config {
     }
 }
 
-#[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[derive(Clone, Debug)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(rename_all = "kebab-case")
+)]
 pub enum SearchFields {
     PrivateKey,
     PublicKey,

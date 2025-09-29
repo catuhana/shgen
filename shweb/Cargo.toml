@@ -10,8 +10,8 @@ crate-type = ["cdylib"]
 console_error_panic_hook = "0.1.7"
 ed25519-dalek.workspace = true
 getrandom = { version = "0.3.3", features = ["wasm_js"] }
+js-sys = "0.3.81"
 rand_chacha.workspace = true
-serde-wasm-bindgen = "0.6.5"
-shgen-config-model = { path = "../shgen-config-model", features = ["wasm-js"] }
+shgen-config-model-wasm = { path = "../shgen-config-model-wasm" }
 shgen-keys = { path = "../shgen-keys" }
-wasm-bindgen = "0.2.104"
+wasm-bindgen.workspace = true

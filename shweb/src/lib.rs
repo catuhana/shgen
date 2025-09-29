@@ -3,7 +3,7 @@ use rand_chacha::{
     ChaCha8Rng,
     rand_core::{RngCore, SeedableRng},
 };
-use shgen_config_model::Config;
+use shgen_config_model_wasm::Config;
 use shgen_keys::{matcher::Matcher, openssh_format::OpenSSHFormatter};
 use wasm_bindgen::prelude::*;
 
@@ -16,9 +16,8 @@ pub struct Generator {
 #[wasm_bindgen]
 impl Generator {
     #[wasm_bindgen(constructor)]
-    pub fn new(config: JsValue) -> Self {
-        let config: Config = serde_wasm_bindgen::from_value(config).unwrap();
-        let matcher = Matcher::new(config.keywords, config.search);
+    pub fn new(config: Config) -> Self {
+        let matcher = Matcher::new(config.keywords(), config.search().inner());
 
         let mut seed = [0u8; 32];
         getrandom::fill(&mut seed).unwrap();
@@ -40,7 +39,11 @@ impl Generator {
             let mut formatter = OpenSSHFormatter::new(signing_key, &mut self.rng);
 
             if let Some((public_key, private_key)) = self.matcher.search_matches(&mut formatter) {
-                return serde_wasm_bindgen::to_value(&(public_key, private_key)).unwrap();
+                return js_sys::Array::of2(
+                    &JsValue::from_str(&public_key),
+                    &JsValue::from_str(&private_key),
+                )
+                .into();
             }
         }
 
