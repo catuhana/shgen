@@ -36,7 +36,7 @@ jobs:
       - name: Set up or update Rust toolchain
         run: rustup toolchain install stable --profile default
 
-      - name: Install wasm32 target
+      - name: Install `wasm32-unknown-unknown` target
         run: rustup target add wasm32-unknown-unknown
 
       - name: Set up Rust cache
