@@ -571,7 +571,6 @@ dependencies = [
  "ed25519-dalek",
  "gdt-cpus",
  "mimalloc",
- "rand",
  "rand_chacha",
  "shgen-config-native",
  "shgen-keep-awake",
