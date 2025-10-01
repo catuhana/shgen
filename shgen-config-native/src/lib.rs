@@ -22,7 +22,7 @@ mod fs_impls {
 
     impl Config {
         pub fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>> {
-            Figment::new()
+            let config: Config = Figment::new()
                 .merge(if let Some(path) = config_path {
                     Yaml::file(path)
                 } else if std::fs::exists("config.yaml").is_ok_and(|exists| exists) {
@@ -34,8 +34,44 @@ mod fs_impls {
                         "No configuration file found, tried config.yaml and config.yml",
                     )));
                 })
-                .extract()
-                .map_err(Into::into)
+                .extract()?;
+
+            config.validate()?;
+            Ok(config)
+        }
+
+        pub fn validate(&self) -> Result<(), Box<figment::Error>> {
+            if self.output.save_to.exists() && !self.output.save_to.is_dir() {
+                return Err(Box::new(figment::Error::from(
+                    "Save path exists but is not a directory",
+                )));
+            }
+
+            if self.runtime.threads <= 0 {
+                return Err(Box::new(figment::Error::from(
+                    "Number of threads must be greater than 0",
+                )));
+            }
+
+            if self.runtime.threads > 192 {
+                return Err(Box::new(figment::Error::from(
+                    "Number of threads must be less than or equal to 192",
+                )));
+            }
+
+            if self.shared.keywords.is_empty() {
+                return Err(Box::new(figment::Error::from(
+                    "At least one keyword must be specified",
+                )));
+            }
+
+            if self.shared.keywords.len() > 64 {
+                return Err(Box::new(figment::Error::from(
+                    "Number of keywords must be less than or equal to 64",
+                )));
+            }
+
+            Ok(())
         }
 
         #[must_use]
