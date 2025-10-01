@@ -3,7 +3,8 @@ use std::ops::Deref;
 pub struct OpenSSHPublicKey(String);
 
 impl OpenSSHPublicKey {
-    pub fn new(key: String) -> Self {
+    #[must_use]
+    pub const fn new(key: String) -> Self {
         Self(key)
     }
 }
@@ -19,7 +20,8 @@ impl Deref for OpenSSHPublicKey {
 pub struct OpenSSHPrivateKey(String);
 
 impl OpenSSHPrivateKey {
-    pub fn new(key: String) -> Self {
+    #[must_use]
+    pub const fn new(key: String) -> Self {
         Self(key)
     }
 }
