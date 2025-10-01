@@ -1,6 +1,6 @@
 use rand::Rng;
 use shgen_config_core::search;
-use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
+use shgen_types::{OpenSSHPrivateKey, OpenSSHPublicKey};
 
 use aho_corasick::{AhoCorasick, AhoCorasickBuilder};
 

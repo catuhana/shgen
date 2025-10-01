@@ -5,7 +5,7 @@ members = [
   "shgen-config-core",
   "shgen-config-native",
   "shgen-config-wasm",
-  "shgen-core",
+  "shgen-types",
   "shgen-keep-awake",
   "shgen-key-utils",
   "shweb",

@@ -1,6 +1,6 @@
 #![allow(clippy::cast_possible_truncation)]
 
-use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
+use shgen_types::{OpenSSHPrivateKey, OpenSSHPublicKey};
 
 use base64::{
     Engine,

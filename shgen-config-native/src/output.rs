@@ -18,7 +18,7 @@ impl Default for Config {
 mod fs_impls {
     use super::Config;
 
-    use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
+    use shgen_types::{OpenSSHPrivateKey, OpenSSHPublicKey};
 
     impl Config {
         pub fn save_keys(&self, public_key: &OpenSSHPublicKey, private_key: &OpenSSHPrivateKey) {

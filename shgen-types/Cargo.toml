@@ -1,4 +1,4 @@
 [package]
-name = "shgen-core"
+name = "shgen-types"
 version.workspace = true
 edition.workspace = true

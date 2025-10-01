@@ -572,9 +572,9 @@ dependencies = [
  "rand",
  "rand_chacha",
  "shgen-config-native",
- "shgen-core",
  "shgen-keep-awake",
  "shgen-key-utils",
+ "shgen-types",
 ]
 
 [[package]]
@@ -591,7 +591,7 @@ dependencies = [
  "figment",
  "serde",
  "shgen-config-core",
- "shgen-core",
+ "shgen-types",
 ]
 
 [[package]]
@@ -601,10 +601,6 @@ dependencies = [
  "shgen-config-core",
  "wasm-bindgen",
 ]
-
-[[package]]
-name = "shgen-core"
-version = "0.0.0"
 
 [[package]]
 name = "shgen-keep-awake"
@@ -626,8 +622,12 @@ dependencies = [
  "sha1",
  "sha2 0.10.9",
  "shgen-config-core",
- "shgen-core",
+ "shgen-types",
 ]
+
+[[package]]
+name = "shgen-types"
+version = "0.0.0"
 
 [[package]]
 name = "shlex"

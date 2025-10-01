@@ -11,8 +11,8 @@ use std::{
 };
 
 use shgen_config_native::Config;
-use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
 use shgen_keep_awake::KeepAwake;
+use shgen_types::{OpenSSHPrivateKey, OpenSSHPublicKey};
 
 use ed25519_dalek::SigningKey;
 use rand::RngCore;
