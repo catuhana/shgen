@@ -1,3 +1,4 @@
+mod shgen 'shgen/Justfile'
 mod shweb 'shweb/Justfile'
 
 set windows-shell := ["pwsh.exe", "-c"]

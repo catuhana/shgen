@@ -1,0 +1,6 @@
+set windows-shell := ["pwsh.exe", "-c"]
+
+build:
+  cargo build --release
+
+build-native $RUSTFLAGS='-Ctarget-cpu=native': build
