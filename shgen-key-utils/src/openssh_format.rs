@@ -80,7 +80,7 @@ impl<'a, R: Rng> OpenSSHFormatter<'a, R> {
         self.base64_engine
             .encode_string(self.generate_public_key_blob(), &mut public_key);
 
-        public_key
+        OpenSSHPublicKey::new(public_key)
     }
 
     pub fn format_private_key(&mut self) -> OpenSSHPrivateKey {
@@ -113,7 +113,7 @@ impl<'a, R: Rng> OpenSSHFormatter<'a, R> {
 
         private_key.push_str(PRIVATE_KEY_FOOTER);
 
-        private_key
+        OpenSSHPrivateKey::new(private_key)
     }
 
     #[must_use]
