@@ -1,4 +1,4 @@
-set windows-shell := ["powershell.exe", "-c"]
+set windows-shell := ["pwsh.exe", "-c"]
 
 www := "www"
 wasm := www / "shweb-wasm"
