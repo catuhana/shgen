@@ -1,5 +1,5 @@
 [package]
-name = "shgen-config-model-core"
+name = "shgen-config-core"
 version.workspace = true
 edition.workspace = true
 

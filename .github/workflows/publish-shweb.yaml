@@ -4,7 +4,7 @@ run-name: ${{ inputs.reason }}
 on:
   push:
     paths:
-      - "shgen-config-model-wasm/**"
+      - "shgen-config-wasm/**"
       - "shweb/**"
   workflow_dispatch:
     inputs:

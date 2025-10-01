@@ -3,7 +3,7 @@ use rand_chacha::{
     ChaCha8Rng,
     rand_core::{RngCore, SeedableRng},
 };
-use shgen_config_model_wasm::{Config, MatchingConfig, SearchConfig, SearchFields};
+use shgen_config_wasm::{Config, MatchingConfig, SearchConfig, SearchFields};
 use shgen_key_utils::{matcher::Matcher, openssh_format::OpenSSHFormatter};
 use wasm_bindgen::prelude::*;
 

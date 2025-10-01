@@ -9,9 +9,7 @@ mimalloc = "0.1.48"
 gdt-cpus = "25.5.0"
 rand.workspace = true
 rand_chacha.workspace = true
-shgen-config-model-native = { path = "../shgen-config-model-native", features = [
-  "fs",
-] }
+shgen-config-native = { path = "../shgen-config-native", features = ["fs"] }
 shgen-core = { path = "../shgen-core" }
 shgen-keep-awake = { path = "../shgen-keep-awake" }
 shgen-key-utils = { path = "../shgen-key-utils" }

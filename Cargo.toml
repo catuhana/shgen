@@ -2,9 +2,9 @@
 resolver = "3"
 members = [
   "shgen",
-  "shgen-config-model-core",
-  "shgen-config-model-native",
-  "shgen-config-model-wasm",
+  "shgen-config-core",
+  "shgen-config-native",
+  "shgen-config-wasm",
   "shgen-core",
   "shgen-keep-awake",
   "shgen-key-utils",

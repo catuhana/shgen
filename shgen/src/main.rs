@@ -10,7 +10,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use shgen_config_model_native::Config;
+use shgen_config_native::Config;
 use shgen_core::{OpenSSHPrivateKey, OpenSSHPublicKey};
 use shgen_keep_awake::KeepAwake;
 

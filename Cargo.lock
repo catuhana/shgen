@@ -571,34 +571,34 @@ dependencies = [
  "mimalloc",
  "rand",
  "rand_chacha",
- "shgen-config-model-native",
+ "shgen-config-native",
  "shgen-core",
  "shgen-keep-awake",
  "shgen-key-utils",
 ]
 
 [[package]]
-name = "shgen-config-model-core"
+name = "shgen-config-core"
 version = "0.0.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
-name = "shgen-config-model-native"
+name = "shgen-config-native"
 version = "0.0.0"
 dependencies = [
  "figment",
  "serde",
- "shgen-config-model-core",
+ "shgen-config-core",
  "shgen-core",
 ]
 
 [[package]]
-name = "shgen-config-model-wasm"
+name = "shgen-config-wasm"
 version = "0.0.0"
 dependencies = [
- "shgen-config-model-core",
+ "shgen-config-core",
  "wasm-bindgen",
 ]
 
@@ -624,7 +624,7 @@ dependencies = [
  "rand_chacha",
  "sha1",
  "sha2 0.10.9",
- "shgen-config-model-core",
+ "shgen-config-core",
  "shgen-core",
 ]
 
@@ -643,7 +643,7 @@ dependencies = [
  "getrandom",
  "js-sys",
  "rand_chacha",
- "shgen-config-model-wasm",
+ "shgen-config-wasm",
  "shgen-key-utils",
  "wasm-bindgen",
 ]
