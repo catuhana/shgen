@@ -3,10 +3,7 @@ use rand_chacha::{
     ChaCha8Rng,
     rand_core::{RngCore, SeedableRng},
 };
-use shgen_config_model_wasm::{
-    Config,
-    search::{SearchConfig, SearchFields, matching::MatchingConfig},
-};
+use shgen_config_model_wasm::{Config, MatchingConfig, SearchConfig, SearchFields};
 use shgen_key_utils::{matcher::Matcher, openssh_format::OpenSSHFormatter};
 use wasm_bindgen::prelude::*;
 
@@ -30,7 +27,7 @@ impl Generator {
         let search_config = SearchConfig::new(fields, matching_config);
         let config = Config::new(keywords, search_config);
 
-        let matcher = Matcher::new(config.keywords(), config.search().inner());
+        let matcher = Matcher::new(config.keywords(), config.search().into());
 
         let mut seed = [0u8; 32];
         getrandom::fill(&mut seed).unwrap();
