@@ -12,6 +12,6 @@ fmt:
 check:
   cargo check --workspace
 
-clippy +args:
+clippy +args="":
   cargo clippy --workspace -- -W clippy::nursery {{args}}
 

@@ -32,7 +32,13 @@ fn main() {
     let config = Config::load(parse_config_path_arg()).expect("failed to load configuration");
 
     let mut keep_awake = if config.runtime.keep_awake {
-        Some(KeepAwake::new("shgen is generating keys"))
+        match KeepAwake::new("shgen is generating keys") {
+            Ok(guard) => Some(guard),
+            Err(error) => {
+                eprint!("Could not keep awake: {error}");
+                None
+            }
+        }
     } else {
         None
     };
@@ -98,9 +104,10 @@ fn main() {
     })
     .expect("failed to spawn status thread");
 
-    // Kind of hacky I guess?
-    if let Some(ref mut keep_awake) = keep_awake {
-        keep_awake.prevent_sleep();
+    if let Some(ref mut keep_awake) = keep_awake
+        && let Err(error) = keep_awake.prevent_sleep()
+    {
+        eprintln!("Failed to prevent system sleep: {error}");
     }
 
     println!("{}", config.generate_config_overview());

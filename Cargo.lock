@@ -610,6 +610,7 @@ version = "0.0.0"
 name = "shgen-keep-awake"
 version = "0.0.0"
 dependencies = [
+ "thiserror",
  "windows 0.62.1",
 ]
 
