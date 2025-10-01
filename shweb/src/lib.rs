@@ -4,7 +4,7 @@ use rand_chacha::{
     rand_core::{RngCore, SeedableRng},
 };
 use shgen_config_wasm::{Config, MatchingConfig, SearchConfig, SearchFields};
-use shgen_key_utils::{matcher::Matcher, openssh_format::OpenSSHFormatter};
+use shgen_key_utils::{matcher::Matcher, openssh};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -46,9 +46,11 @@ impl Generator {
             self.rng.fill_bytes(&mut secret_key);
 
             let signing_key = SigningKey::from_bytes(&secret_key);
-            let mut formatter = OpenSSHFormatter::new(signing_key, &mut self.rng);
+            let mut formatter = openssh::format::Formatter::new(signing_key);
 
-            if let Some((public_key, private_key)) = self.matcher.search_matches(&mut formatter) {
+            if let Some((public_key, private_key)) =
+                self.matcher.search_matches(&mut formatter, &mut self.rng)
+            {
                 return js_sys::Array::of2(
                     &JsValue::from_str(&public_key),
                     &JsValue::from_str(&private_key),

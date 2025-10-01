@@ -15,10 +15,10 @@ use shgen_keep_awake::KeepAwake;
 use shgen_types::{OpenSSHPrivateKey, OpenSSHPublicKey};
 
 use ed25519_dalek::SigningKey;
-use rand::RngCore;
+use rand::Rng as _;
 use rand_chacha::{ChaCha8Rng, rand_core::SeedableRng};
 
-use shgen_key_utils::{matcher::Matcher, openssh_format::OpenSSHFormatter};
+use shgen_key_utils::{matcher::Matcher, openssh};
 
 #[global_allocator]
 static ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -135,15 +135,17 @@ fn worker(matcher: &Matcher) {
 
     let mut secret_keys = [0u8; 32 * BATCH_SIZE];
     while !STOP_WORKERS.load(Ordering::Relaxed) {
-        chacha8_rng.fill_bytes(&mut secret_keys);
+        chacha8_rng.fill(&mut secret_keys);
 
         // There can't be any remainders, so discard it.
         let (secret_keys_chunks, _) = secret_keys.as_chunks::<32>();
         for secret_key in secret_keys_chunks {
             let signing_key = SigningKey::from_bytes(secret_key);
-            let mut formatter = OpenSSHFormatter::new(signing_key, &mut thread_rng);
+            let mut formatter = openssh::format::Formatter::new(signing_key);
 
-            if let Some((public_key, private_key)) = matcher.search_matches(&mut formatter) {
+            if let Some((public_key, private_key)) =
+                matcher.search_matches(&mut formatter, &mut thread_rng)
+            {
                 if FOUND_KEY.set((public_key, private_key)).is_ok() {
                     STOP_WORKERS.store(true, Ordering::Release);
                 }

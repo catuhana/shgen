@@ -4,11 +4,10 @@ use shgen_types::{OpenSSHPrivateKey, OpenSSHPublicKey};
 
 use aho_corasick::{AhoCorasick, AhoCorasickBuilder};
 
-use crate::openssh_format::{Fingerprint, OpenSSHFormatter};
+use crate::openssh::{self, Fingerprint};
 
 pub struct Matcher {
     search: search::Config,
-
     aho_corasick: AhoCorasick,
 }
 
@@ -26,27 +25,28 @@ impl Matcher {
         }
     }
 
-    pub fn search_matches(
+    pub fn search_matches<R: Rng>(
         &self,
-        openssh_formatter: &mut OpenSSHFormatter<impl Rng>,
+        formatter: &mut openssh::format::Formatter,
+        rng: &mut R,
     ) -> Option<(OpenSSHPublicKey, OpenSSHPrivateKey)> {
         let fields = &self.search.fields;
 
         let match_found = if self.search.matching.all_fields {
             fields
                 .iter()
-                .all(|field| self.search_in_field(field, openssh_formatter))
+                .all(|field| self.search_in_field(field, formatter, rng))
         } else {
             fields
                 .iter()
-                .any(|field| self.search_in_field(field, openssh_formatter))
+                .any(|field| self.search_in_field(field, formatter, rng))
         };
 
         if match_found {
             // When a match is found, we'll stop anyway
             // so it's fine to re-format the keys here.
-            let public_key = openssh_formatter.format_public_key();
-            let private_key = openssh_formatter.format_private_key();
+            let public_key = formatter.format_public_key();
+            let private_key = formatter.format_private_key(rng);
 
             Some((public_key, private_key))
         } else {
@@ -54,18 +54,19 @@ impl Matcher {
         }
     }
 
-    fn search_in_field(
+    fn search_in_field<R: Rng>(
         &self,
         field: &search::SearchFields,
-        openssh_formatter: &mut OpenSSHFormatter<impl Rng>,
+        formatter: &mut openssh::format::Formatter,
+        rng: &mut R,
     ) -> bool {
         match field {
             search::SearchFields::PublicKey => {
-                let public_key = openssh_formatter.format_public_key();
+                let public_key = formatter.format_public_key();
                 self.matches_aho_corasick(&public_key)
             }
             search::SearchFields::PrivateKey => {
-                let private_key = openssh_formatter.format_private_key();
+                let private_key = formatter.format_private_key(rng);
                 self.matches_aho_corasick(&private_key)
             }
             fingerprint => {
@@ -77,7 +78,7 @@ impl Matcher {
                     _ => unreachable!(),
                 };
 
-                let fingerprint = openssh_formatter.format_fingerprint(&fingerprint_type);
+                let fingerprint = formatter.format_fingerprint(&fingerprint_type);
                 self.matches_aho_corasick(&fingerprint)
             }
         }
