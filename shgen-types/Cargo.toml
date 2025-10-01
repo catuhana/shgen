@@ -2,3 +2,4 @@
 name = "shgen-types"
 version.workspace = true
 edition.workspace = true
+license.workspace = true

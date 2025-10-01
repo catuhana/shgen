@@ -14,6 +14,7 @@ members = [
 [workspace.package]
 version = "0.0.0"
 edition = "2024"
+license = "BSD-3-Clause"
 
 [workspace.dependencies]
 ed25519-dalek = { version = "3.0.0-pre.1", default-features = false }
