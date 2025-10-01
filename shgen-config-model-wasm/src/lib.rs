@@ -7,6 +7,7 @@ use macros::core_to_wasm_wrapper;
 use crate::macros::core_enum_to_wasm;
 
 core_to_wasm_wrapper! {
+    #[derive(Debug)]
     pub struct Config(shgen_config_model_core::Config);
     constructor(keywords: Vec<String>, search: SearchConfig) {
         Self(shgen_config_model_core::Config {
@@ -24,7 +25,7 @@ core_to_wasm_wrapper! {
 }
 
 core_to_wasm_wrapper! {
-    #[derive(Clone, Debug)]
+    #[derive(Debug)]
     pub struct SearchConfig(shgen_config_model_core::search::Config);
     constructor(fields: Vec<SearchFields>, matching: MatchingConfig) {
         Self(shgen_config_model_core::search::Config {
@@ -35,7 +36,7 @@ core_to_wasm_wrapper! {
 }
 
 core_to_wasm_wrapper! {
-    #[derive(Clone, Debug)]
+    #[derive(Debug)]
     pub struct MatchingConfig(shgen_config_model_core::search::matching::Config);
     constructor(all_keywords: bool, all_fields: bool) {
         Self(shgen_config_model_core::search::matching::Config {
