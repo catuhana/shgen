@@ -37,7 +37,7 @@ fn main() {
         match KeepAwake::new("shgen is generating keys") {
             Ok(guard) => Some(guard),
             Err(error) => {
-                eprint!("Could not keep awake: {error}");
+                eprintln!("Could not keep awake: {error}");
                 None
             }
         }
