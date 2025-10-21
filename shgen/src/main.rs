@@ -127,35 +127,27 @@ fn main() {
 }
 
 fn worker(matcher: &Matcher) {
-    // TODO: Experiment with different batch
-    // sizes, maybe even make it configurable.
-    const BATCH_SIZE: usize = 8;
-
     // https://eprint.iacr.org/2019/1492.pdf Section 5.3
     let mut chacha8_rng = ChaCha8Rng::from_os_rng();
 
-    let mut secret_keys = [0u8; 32 * BATCH_SIZE];
+    let mut secret_key = [0u8; 32];
     while !STOP_WORKERS.load(Ordering::Relaxed) {
-        chacha8_rng.fill_bytes(&mut secret_keys);
+        chacha8_rng.fill_bytes(&mut secret_key);
 
-        // There can't be any remainders, so discard it.
-        let (secret_keys_chunks, _) = secret_keys.as_chunks::<32>();
-        for secret_key in secret_keys_chunks {
-            let signing_key = SigningKey::from_bytes(secret_key);
-            let mut formatter = openssh::format::Formatter::new(signing_key);
+        let signing_key = SigningKey::from_bytes(&secret_key);
+        let mut formatter = openssh::format::Formatter::new(signing_key);
 
-            if let Some((public_key, private_key)) =
-                matcher.search_matches(&mut formatter, &mut chacha8_rng)
-            {
-                if FOUND_KEY.set((public_key, private_key)).is_ok() {
-                    STOP_WORKERS.store(true, Ordering::Release);
-                }
-
-                return;
+        if let Some((public_key, private_key)) =
+            matcher.search_matches(&mut formatter, &mut chacha8_rng)
+        {
+            if FOUND_KEY.set((public_key, private_key)).is_ok() {
+                STOP_WORKERS.store(true, Ordering::Release);
             }
+
+            return;
         }
 
-        KEYS_COUNTER.fetch_add(BATCH_SIZE as u64, Ordering::Relaxed);
+        KEYS_COUNTER.fetch_add(1, Ordering::Relaxed);
     }
 }
 
