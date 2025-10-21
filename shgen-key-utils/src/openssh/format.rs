@@ -1,7 +1,4 @@
-use base64::{
-    Engine,
-    engine::{GeneralPurpose, general_purpose::STANDARD_NO_PAD},
-};
+use base64::{Engine, engine::general_purpose::STANDARD_NO_PAD};
 use ed25519_dalek::{PUBLIC_KEY_LENGTH, SECRET_KEY_LENGTH, SigningKey, VerifyingKey};
 use rand::Rng;
 use sha1::Sha1;
@@ -13,7 +10,6 @@ use crate::openssh::Fingerprint;
 pub struct Formatter {
     signing_key: SigningKey,
     verifying_key: VerifyingKey,
-    base64_engine: GeneralPurpose,
 }
 
 impl Formatter {
@@ -23,8 +19,12 @@ impl Formatter {
         Self {
             signing_key,
             verifying_key,
-            base64_engine: STANDARD_NO_PAD,
         }
+    }
+
+    pub fn update_keys(&mut self, signing_key: SigningKey) {
+        self.verifying_key = signing_key.verifying_key();
+        self.signing_key = signing_key;
     }
 
     #[must_use]
@@ -37,8 +37,7 @@ impl Formatter {
 
         public_key.push_str(format::ALGORITHM);
         public_key.push(' ');
-        self.base64_engine
-            .encode_string(self.build_public_key_blob(), &mut public_key);
+        STANDARD_NO_PAD.encode_string(self.build_public_key_blob(), &mut public_key);
 
         OpenSSHPublicKey::new(public_key)
     }
@@ -55,7 +54,7 @@ impl Formatter {
         let mut encoded_buffer = [0u8; ENCODED_LEN];
         let blob = self.build_private_key_blob(rng);
 
-        self.base64_engine
+        STANDARD_NO_PAD
             .encode_slice(blob, &mut encoded_buffer)
             .unwrap();
 
@@ -72,10 +71,10 @@ impl Formatter {
     pub fn format_fingerprint(&self, fingerprint: &Fingerprint) -> String {
         let blob = self.build_public_key_blob();
         match fingerprint {
-            Fingerprint::Sha1 => self.base64_engine.encode(Sha1::digest(blob)),
-            Fingerprint::Sha256 => self.base64_engine.encode(Sha256::digest(blob)),
-            Fingerprint::Sha384 => self.base64_engine.encode(Sha384::digest(blob)),
-            Fingerprint::Sha512 => self.base64_engine.encode(Sha512::digest(blob)),
+            Fingerprint::Sha1 => STANDARD_NO_PAD.encode(Sha1::digest(blob)),
+            Fingerprint::Sha256 => STANDARD_NO_PAD.encode(Sha256::digest(blob)),
+            Fingerprint::Sha384 => STANDARD_NO_PAD.encode(Sha384::digest(blob)),
+            Fingerprint::Sha512 => STANDARD_NO_PAD.encode(Sha512::digest(blob)),
         }
     }
 
@@ -128,6 +127,18 @@ impl Formatter {
         }
 
         blob
+    }
+}
+
+impl Default for Formatter {
+    fn default() -> Self {
+        let signing_key = SigningKey::from_bytes(&[0u8; 32]);
+        let verifying_key = signing_key.verifying_key();
+
+        Self {
+            signing_key,
+            verifying_key,
+        }
     }
 }
 

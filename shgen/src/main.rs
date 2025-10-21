@@ -127,15 +127,17 @@ fn main() {
 }
 
 fn worker(matcher: &Matcher) {
+    let mut secret_key = [0u8; 32];
+
     // https://eprint.iacr.org/2019/1492.pdf Section 5.3
     let mut chacha8_rng = ChaCha8Rng::from_os_rng();
+    let mut formatter = openssh::format::Formatter::default();
 
-    let mut secret_key = [0u8; 32];
     while !STOP_WORKERS.load(Ordering::Relaxed) {
         chacha8_rng.fill_bytes(&mut secret_key);
 
         let signing_key = SigningKey::from_bytes(&secret_key);
-        let mut formatter = openssh::format::Formatter::new(signing_key);
+        formatter.update_keys(signing_key);
 
         if let Some((public_key, private_key)) =
             matcher.search_matches(&mut formatter, &mut chacha8_rng)
