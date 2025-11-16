@@ -1,5 +1,8 @@
 import init, { Generator, SearchFields } from "../shweb-wasm/shweb.js";
 
+// Keep it synced with shweb/src/lib.rs
+const BATCH_SIZE = (8 * 1024) / 32;
+
 class SSHKeyWorker {
   /**
    * @type {Generator | null}
@@ -12,13 +15,7 @@ class SSHKeyWorker {
    */
   #abortController;
 
-  batchSize;
-
-  constructor(defaultBatchSize = 256) {
-    this.batchSize = defaultBatchSize;
-  }
-
-  async initialise(config, batchSize = this.batchSize) {
+  async initialise(config) {
     if (this.#generator) throw new Error("Already initialised");
 
     await init();
@@ -39,9 +36,8 @@ class SSHKeyWorker {
       config.search.matching["all-keywords"],
       config.search.matching["all-fields"]
     );
-    this.batchSize = batchSize;
 
-    return { success: true, batchSize: this.batchSize };
+    return { success: true };
   }
 
   async start() {
@@ -75,7 +71,7 @@ class SSHKeyWorker {
 
     try {
       while (this.#isRunning && !signal.aborted) {
-        const data = this.#generator.generateBatch(this.batchSize);
+        const data = this.#generator.generateBatch();
 
         if (data) {
           this.post({
@@ -87,7 +83,7 @@ class SSHKeyWorker {
           return;
         }
 
-        this.post({ type: "progress", keysGenerated: this.batchSize });
+        this.post({ type: "progress", keysGenerated: BATCH_SIZE });
       }
     } catch (error) {
       if (!signal.aborted) this.post({ type: "error", error: error.message });
@@ -106,9 +102,9 @@ class SSHKeyWorker {
 const worker = new SSHKeyWorker();
 
 const handlers = {
-  async init({ config, batchSize }) {
-    await worker.initialise(config, batchSize);
-    worker.post({ type: "init", batchSize: worker.batchSize });
+  async init({ config }) {
+    await worker.initialise(config);
+    worker.post({ type: "init", batchSize: BATCH_SIZE });
   },
   start: () => worker.start(),
   stop: () => {

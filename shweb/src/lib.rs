@@ -1,15 +1,16 @@
-use ed25519_dalek::SigningKey;
+use ed25519_dalek::{SECRET_KEY_LENGTH, SigningKey};
 use rand_chacha::{
     ChaCha8Rng,
     rand_core::{RngCore, SeedableRng},
 };
 use shgen_config_wasm::{Config, MatchingConfig, SearchConfig, SearchFields};
-use shgen_key_utils::{matcher::Matcher, openssh};
+use shgen_key_utils::{matcher::Matcher, openssh::format::Formatter};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub struct Generator {
     matcher: Matcher,
+    formatter: Formatter,
     rng: ChaCha8Rng,
 }
 
@@ -34,22 +35,26 @@ impl Generator {
 
         Self {
             matcher,
+            formatter: Formatter::empty(),
             rng: ChaCha8Rng::from_seed(seed),
         }
     }
 
     #[wasm_bindgen(js_name = generateBatch)]
-    pub fn generate_batch(&mut self, batch_size: usize) -> JsValue {
-        let mut secret_key = [0u8; 32];
+    pub fn generate_batch(&mut self) -> JsValue {
+        const BATCH_SIZE: usize = (8 * 1024) / SECRET_KEY_LENGTH;
 
-        for _ in 0..batch_size {
-            self.rng.fill_bytes(&mut secret_key);
+        let mut secret_keys_batch = [0u8; BATCH_SIZE * SECRET_KEY_LENGTH];
+        self.rng.fill_bytes(&mut secret_keys_batch);
 
-            let signing_key = SigningKey::from_bytes(&secret_key);
-            let mut formatter = openssh::format::Formatter::new(signing_key);
+        let (secret_keys_chunks, _) = secret_keys_batch.as_chunks::<SECRET_KEY_LENGTH>();
+        for secret_key in secret_keys_chunks {
+            let signing_key = SigningKey::from_bytes(secret_key);
+            self.formatter.update_keys(signing_key);
 
-            if let Some((public_key, private_key)) =
-                self.matcher.search_matches(&mut formatter, &mut self.rng)
+            if let Some((public_key, private_key)) = self
+                .matcher
+                .search_matches(&mut self.formatter, &mut self.rng)
             {
                 return js_sys::Array::of2(
                     &JsValue::from_str(&public_key),
