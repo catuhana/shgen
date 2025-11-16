@@ -9,6 +9,7 @@ pub enum Rng {
 }
 
 impl Rng {
+    #[must_use]
     pub fn from_best_available() -> Self {
         if Self::is_aes_available() {
             Self::Aes128Ctr64(Aes128Ctr64::from_os_rng())

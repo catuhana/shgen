@@ -13,6 +13,7 @@ pub struct Formatter {
 }
 
 impl Formatter {
+    #[must_use]
     pub fn new(signing_key: SigningKey) -> Self {
         let verifying_key = signing_key.verifying_key();
 
@@ -22,6 +23,7 @@ impl Formatter {
         }
     }
 
+    #[must_use]
     pub fn empty() -> Self {
         Self::new(SigningKey::from_bytes(&[0u8; SECRET_KEY_LENGTH]))
     }
@@ -34,12 +36,12 @@ impl Formatter {
     #[must_use]
     pub fn format_public_key(&self) -> OpenSSHPublicKey {
         let mut public_key = String::with_capacity(
-            format::ALGORITHM.len()
+            constants::ALGORITHM.len()
                 + 1
                 + base64::encoded_len(sizes::PUBLIC_KEY_BLOB, false).unwrap(),
         );
 
-        public_key.push_str(format::ALGORITHM);
+        public_key.push_str(constants::ALGORITHM);
         public_key.push(' ');
         STANDARD_NO_PAD.encode_string(self.build_public_key_blob(), &mut public_key);
 
@@ -86,22 +88,22 @@ impl Formatter {
         let mut blob = [0u8; sizes::PUBLIC_KEY_BLOB];
         let mut writer = SshEncoder::new(&mut blob);
 
-        writer.write_string(format::ALGORITHM.as_bytes());
+        writer.write_string(constants::ALGORITHM.as_bytes());
         writer.write_u32(PUBLIC_KEY_LENGTH as u32);
         writer.write_bytes(self.verifying_key.as_bytes());
 
         blob
     }
 
-    fn build_private_key_blob<R: Rng>(&mut self, rng: &mut R) -> [u8; sizes::PRIVATE_KEY_BLOB] {
+    fn build_private_key_blob<R: Rng>(&self, rng: &mut R) -> [u8; sizes::PRIVATE_KEY_BLOB] {
         let mut blob = [0u8; sizes::PRIVATE_KEY_BLOB];
         let mut writer = SshEncoder::new(&mut blob);
 
         // header
-        writer.write_bytes(format::MAGIC);
-        writer.write_string(format::CIPHER);
-        writer.write_string(format::KDF);
-        writer.write_u32(format::KDF_OPTIONS.len() as u32);
+        writer.write_bytes(constants::MAGIC);
+        writer.write_string(constants::CIPHER);
+        writer.write_string(constants::KDF);
+        writer.write_u32(constants::KDF_OPTIONS.len() as u32);
         writer.write_u32(1); // number of keys
 
         // public key blob
@@ -117,7 +119,7 @@ impl Formatter {
         writer.write_bytes(&checkint);
         writer.write_bytes(&checkint);
 
-        writer.write_string(format::ALGORITHM.as_bytes());
+        writer.write_string(constants::ALGORITHM.as_bytes());
         writer.write_u32(PUBLIC_KEY_LENGTH as u32);
         writer.write_bytes(self.verifying_key.as_bytes());
         writer.write_u32((PUBLIC_KEY_LENGTH + SECRET_KEY_LENGTH) as u32);
@@ -134,7 +136,7 @@ impl Formatter {
     }
 }
 
-mod format {
+mod constants {
     pub const ALGORITHM: &str = "ssh-ed25519";
 
     pub const MAGIC: &[u8] = b"openssh-key-v1\0";
@@ -144,24 +146,24 @@ mod format {
 }
 
 mod sizes {
-    use super::format;
+    use super::constants;
     use ed25519_dalek::{PUBLIC_KEY_LENGTH, SECRET_KEY_LENGTH};
 
-    pub const PUBLIC_KEY_BLOB: usize = (4 + format::ALGORITHM.len()) // algorithm name length + name
+    pub const PUBLIC_KEY_BLOB: usize = (4 + constants::ALGORITHM.len()) // algorithm name length + name
         + (4 + PUBLIC_KEY_LENGTH); // public key length + key
 
     pub const PRIVATE_KEY_SECTION: usize = (4 + 4) +    // two check-ints
-        (4 + format::ALGORITHM.len()) +                 // algorithm name length + name
+        (4 + constants::ALGORITHM.len()) +                 // algorithm name length + name
         (4 + PUBLIC_KEY_LENGTH) +                       // public key length + key
         (4 + (PUBLIC_KEY_LENGTH + SECRET_KEY_LENGTH)) + // private key length + keys
         4; // comment length
 
     pub const PRIVATE_KEY_PADDING: usize = (8 - (PRIVATE_KEY_SECTION % 8)) % 8;
 
-    pub const PRIVATE_KEY_BLOB: usize = format::MAGIC.len() +
-        (4 + format::CIPHER.len()) +
-        (4 + format::KDF.len()) +
-        (4 + format::KDF_OPTIONS.len()) +
+    pub const PRIVATE_KEY_BLOB: usize = constants::MAGIC.len() +
+        (4 + constants::CIPHER.len()) +
+        (4 + constants::KDF.len()) +
+        (4 + constants::KDF_OPTIONS.len()) +
         4 +                                                // number of keys
         (4 + PUBLIC_KEY_BLOB) +                            // public key blob length + blob
         (4 + (PRIVATE_KEY_SECTION + PRIVATE_KEY_PADDING)); // private key section length;
@@ -173,7 +175,7 @@ struct SshEncoder<'a> {
 }
 
 impl<'a> SshEncoder<'a> {
-    fn new(buffer: &'a mut [u8]) -> Self {
+    const fn new(buffer: &'a mut [u8]) -> Self {
         Self { buffer, cursor: 0 }
     }
 

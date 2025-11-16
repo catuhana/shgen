@@ -22,7 +22,7 @@ mod fs_impls {
 
     impl Config {
         pub fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>> {
-            let config: Config = Figment::new()
+            let config: Self = Figment::new()
                 .merge(if let Some(path) = config_path {
                     Yaml::file(path)
                 } else if std::fs::exists("config.yaml").is_ok_and(|exists| exists) {
@@ -47,7 +47,7 @@ mod fs_impls {
                 )));
             }
 
-            if self.runtime.threads <= 0 {
+            if self.runtime.threads == 0 {
                 return Err(Box::new(figment::Error::from(
                     "Number of threads must be greater than 0",
                 )));
