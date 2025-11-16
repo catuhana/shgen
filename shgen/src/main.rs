@@ -10,15 +10,13 @@ use std::{
     time::{Duration, Instant},
 };
 
+use rand::RngCore as _;
 use shgen_config_native::Config;
 use shgen_keep_awake::KeepAwake;
+use shgen_rand::Rng;
 use shgen_types::{OpenSSHPrivateKey, OpenSSHPublicKey};
 
-use ed25519_dalek::SigningKey;
-use rand_chacha::{
-    ChaCha8Rng,
-    rand_core::{RngCore, SeedableRng},
-};
+use ed25519_dalek::{SECRET_KEY_LENGTH, SigningKey};
 
 use shgen_key_utils::{matcher::Matcher, openssh};
 
@@ -127,29 +125,32 @@ fn main() {
 }
 
 fn worker(matcher: &Matcher) {
-    let mut secret_key = [0u8; 32];
+    const BATCH_COUNT: usize = (16 * 1024) / SECRET_KEY_LENGTH;
 
-    // https://eprint.iacr.org/2019/1492.pdf Section 5.3
-    let mut chacha8_rng = ChaCha8Rng::from_os_rng();
-    let mut formatter = openssh::format::Formatter::default();
+    let mut rng = Rng::from_best_available();
+    let mut formatter = openssh::format::Formatter::empty();
 
-    while !STOP_WORKERS.load(Ordering::Relaxed) {
-        chacha8_rng.fill_bytes(&mut secret_key);
+    while !STOP_WORKERS.load(Ordering::Acquire) {
+        let mut secret_keys_batch = [0u8; SECRET_KEY_LENGTH * BATCH_COUNT];
+        rng.fill_bytes(&mut secret_keys_batch);
 
-        let signing_key = SigningKey::from_bytes(&secret_key);
-        formatter.update_keys(signing_key);
+        let (secret_keys_chunks, _) = secret_keys_batch.as_chunks::<SECRET_KEY_LENGTH>();
+        for secret_key in secret_keys_chunks {
+            let signing_key = SigningKey::from_bytes(secret_key);
+            formatter.update_keys(signing_key);
 
-        if let Some((public_key, private_key)) =
-            matcher.search_matches(&mut formatter, &mut chacha8_rng)
-        {
-            if FOUND_KEY.set((public_key, private_key)).is_ok() {
-                STOP_WORKERS.store(true, Ordering::Release);
+            if let Some((public_key, private_key)) =
+                matcher.search_matches(&mut formatter, &mut rng)
+            {
+                if FOUND_KEY.set((public_key, private_key)).is_ok() {
+                    STOP_WORKERS.store(true, Ordering::Release);
+                }
+
+                return;
             }
-
-            return;
         }
 
-        KEYS_COUNTER.fetch_add(1, Ordering::Relaxed);
+        KEYS_COUNTER.fetch_add(BATCH_COUNT as u64, Ordering::Relaxed);
     }
 }
 

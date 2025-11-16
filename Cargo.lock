@@ -434,6 +434,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rand_aes"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ea2a5761d4b040674107330783e395c27d881d173eba8c34274c7f79372b85f2"
+dependencies = [
+ "getrandom",
+ "rand_core",
+]
+
+[[package]]
 name = "rand_chacha"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -571,10 +581,11 @@ dependencies = [
  "ed25519-dalek",
  "gdt-cpus",
  "mimalloc",
- "rand_chacha",
+ "rand",
  "shgen-config-native",
  "shgen-keep-awake",
  "shgen-key-utils",
+ "shgen-rand",
  "shgen-types",
 ]
 
@@ -619,11 +630,19 @@ dependencies = [
  "base64",
  "ed25519-dalek",
  "rand",
- "rand_chacha",
  "sha1",
  "sha2 0.10.9",
  "shgen-config-core",
  "shgen-types",
+]
+
+[[package]]
+name = "shgen-rand"
+version = "0.0.0"
+dependencies = [
+ "rand",
+ "rand_aes",
+ "rand_chacha",
 ]
 
 [[package]]

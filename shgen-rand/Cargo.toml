@@ -1,0 +1,10 @@
+[package]
+name = "shgen-rand"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+rand.workspace = true
+rand_aes.workspace = true
+rand_chacha.workspace = true

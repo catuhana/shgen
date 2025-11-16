@@ -22,6 +22,10 @@ impl Formatter {
         }
     }
 
+    pub fn empty() -> Self {
+        Self::new(SigningKey::from_bytes(&[0u8; SECRET_KEY_LENGTH]))
+    }
+
     pub fn update_keys(&mut self, signing_key: SigningKey) {
         self.verifying_key = signing_key.verifying_key();
         self.signing_key = signing_key;
@@ -127,18 +131,6 @@ impl Formatter {
         }
 
         blob
-    }
-}
-
-impl Default for Formatter {
-    fn default() -> Self {
-        let signing_key = SigningKey::from_bytes(&[0u8; 32]);
-        let verifying_key = signing_key.verifying_key();
-
-        Self {
-            signing_key,
-            verifying_key,
-        }
     }
 }
 

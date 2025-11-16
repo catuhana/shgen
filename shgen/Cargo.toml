@@ -7,8 +7,9 @@ edition.workspace = true
 ed25519-dalek.workspace = true
 mimalloc = "0.1.48"
 gdt-cpus = "25.5.0"
-rand_chacha.workspace = true
+rand.workspace = true
 shgen-config-native = { path = "../shgen-config-native", features = ["fs"] }
 shgen-types = { path = "../shgen-types" }
 shgen-keep-awake = { path = "../shgen-keep-awake" }
 shgen-key-utils = { path = "../shgen-key-utils" }
+shgen-rand = { path = "../shgen-rand" }
