@@ -125,7 +125,7 @@ fn main() {
 }
 
 fn worker(matcher: &Matcher) {
-    const BATCH_COUNT: usize = (16 * 1024) / SECRET_KEY_LENGTH;
+    const BATCH_COUNT: usize = (8 * 1024) / SECRET_KEY_LENGTH;
 
     let mut rng = Rng::from_best_available();
     let mut formatter = openssh::format::Formatter::empty();
