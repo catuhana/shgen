@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 console_error_panic_hook = "0.1.7"
 ed25519-dalek.workspace = true
 getrandom = { version = "0.3.4", features = ["wasm_js"] }
-js-sys = "0.3.81"
+js-sys = "0.3.82"
 rand_chacha.workspace = true
 shgen-config-wasm = { path = "../shgen-config-wasm" }
 shgen-key-utils = { path = "../shgen-key-utils" }
