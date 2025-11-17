@@ -21,20 +21,8 @@ mod fs_impls {
     use figment::{Figment, providers::Yaml};
 
     impl Config {
-        pub fn load(config_path: Option<PathBuf>) -> Result<Self, Box<figment::Error>> {
-            let config: Self = Figment::new()
-                .merge(if let Some(path) = config_path {
-                    Yaml::file(path)
-                } else if std::fs::exists("config.yaml").is_ok_and(|exists| exists) {
-                    Yaml::file("config.yaml")
-                } else if std::fs::exists("config.yml").is_ok_and(|exists| exists) {
-                    Yaml::file("config.yml")
-                } else {
-                    return Err(Box::new(figment::Error::from(
-                        "No configuration file found, tried config.yaml and config.yml",
-                    )));
-                })
-                .extract()?;
+        pub fn load(config_path: PathBuf) -> Result<Self, Box<figment::Error>> {
+            let config: Self = Figment::new().merge(Yaml::file(config_path)).extract()?;
 
             config.validate()?;
             Ok(config)

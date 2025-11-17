@@ -1,0 +1,9 @@
+[package]
+name = "shgen-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+facet = "0.30.0"      # Pin to the same version as `facet-args`
+facet-args = "0.30.0"

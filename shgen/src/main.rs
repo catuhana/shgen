@@ -1,12 +1,10 @@
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::cast_possible_truncation)]
 
-use std::{
-    path::PathBuf,
-    sync::atomic::{AtomicBool, Ordering},
-};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use rand::RngCore as _;
+use shgen_cli::Cli;
 use shgen_config_native::Config;
 use shgen_keep_awake::KeepAwake;
 use shgen_rand::Rng;
@@ -22,7 +20,8 @@ static ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
 static STOP_WORKERS: AtomicBool = AtomicBool::new(false);
 
 fn main() {
-    let config = Config::load(parse_config_path_arg()).expect("failed to load configuration");
+    let cli = Cli::try_parse().unwrap();
+    let config = Config::load(cli.config).unwrap();
 
     let mut keep_awake = if config.runtime.keep_awake {
         match KeepAwake::new("shgen is generating keys") {
@@ -100,23 +99,6 @@ fn worker(matcher: &Matcher) -> Option<(OpenSSHPublicKey, OpenSSHPrivateKey)> {
                 STOP_WORKERS.store(true, Ordering::Release);
                 return Some((public_key, private_key));
             }
-        }
-    }
-
-    None
-}
-
-fn parse_config_path_arg() -> Option<PathBuf> {
-    let args: Vec<String> = std::env::args().collect();
-
-    for index in 0..args.len() {
-        if args[index] == "--config" || args[index] == "-c" {
-            if index + 1 < args.len() {
-                return Some(PathBuf::from(&args[index + 1]));
-            }
-
-            eprintln!("Expected a path after '{}'", args[index]);
-            std::process::exit(1);
         }
     }
 
