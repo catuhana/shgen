@@ -130,8 +130,8 @@ fn worker(matcher: &Matcher) {
     let mut rng = Rng::from_best_available();
     let mut formatter = openssh::format::Formatter::empty();
 
+    let mut secret_keys_batch = [0u8; SECRET_KEY_LENGTH * BATCH_COUNT];
     while !STOP_WORKERS.load(Ordering::Acquire) {
-        let mut secret_keys_batch = [0u8; SECRET_KEY_LENGTH * BATCH_COUNT];
         rng.fill_bytes(&mut secret_keys_batch);
 
         let (secret_keys_chunks, _) = secret_keys_batch.as_chunks::<SECRET_KEY_LENGTH>();
