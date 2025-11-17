@@ -29,8 +29,8 @@ impl FromStr for Command {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().as_str() {
-            "generate" => Ok(Command::Generate),
-            "benchmark" => Ok(Command::Benchmark),
+            "generate" => Ok(Self::Generate),
+            "benchmark" => Ok(Self::Benchmark),
             _ => Err(format!("invalid command: {}", s)),
         }
     }
