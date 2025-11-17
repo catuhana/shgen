@@ -48,8 +48,6 @@ pub fn generate(config: Config) {
         eprintln!("Failed to prevent system sleep: {error}");
     }
 
-    println!("{}", config.generate_config_overview());
-
     let mut found_key: Option<(OpenSSHPublicKey, OpenSSHPrivateKey)> = None;
     for handle in worker_handles {
         if let Ok(Some(key_pair)) = handle.join()

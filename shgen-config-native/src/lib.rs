@@ -61,31 +61,5 @@ mod fs_impls {
 
             Ok(())
         }
-
-        #[must_use]
-        pub fn generate_config_overview(&self) -> String {
-            format!(
-                "Keywords:\n  {:?}\n\
-             Search fields:\n  {:?}\n\
-             Matching:\n  All keywords: {}\n  All fields: {}\n\
-             Threads: {}\n\
-             Keep awake: {}\n\
-             Set affinity: {}\n\
-             Save folder: {}",
-                self.shared.keywords,
-                self.shared
-                    .search
-                    .fields
-                    .iter()
-                    .map(|field| format!("{field:?}"))
-                    .collect::<Vec<String>>(),
-                self.shared.search.matching.all_keywords,
-                self.shared.search.matching.all_fields,
-                self.runtime.threads,
-                self.runtime.keep_awake,
-                self.runtime.pin_threads,
-                self.output.save_to.display()
-            )
-        }
     }
 }
