@@ -1,15 +1,37 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, str::FromStr};
 
 use facet::Facet;
 
-#[derive(Facet)]
+#[derive(Debug, Facet)]
 pub struct Cli {
-    #[facet(positional, default = PathBuf::from("config.yaml"))]
+    #[facet(positional, default = Command::Generate)]
+    pub command: Command,
+
+    #[facet(named, short = 'c', default = PathBuf::from("config.yaml"))]
     pub config: PathBuf,
 }
 
 impl Cli {
     pub fn try_parse() -> Result<Self, Box<dyn std::error::Error>> {
-        facet_args::from_std_args().map_err(|e| e.into())
+        facet_args::from_std_args().map_err(|error| error.into())
+    }
+}
+
+#[derive(Debug, Facet)]
+#[repr(C)]
+pub enum Command {
+    Generate,
+    Benchmark,
+}
+
+impl FromStr for Command {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_ascii_lowercase().as_str() {
+            "generate" => Ok(Command::Generate),
+            "benchmark" => Ok(Command::Benchmark),
+            _ => Err(format!("invalid command: {}", s)),
+        }
     }
 }
