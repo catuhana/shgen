@@ -1,13 +1,9 @@
-use std::sync::atomic::{AtomicBool, Ordering};
-
 use ed25519_dalek::{SECRET_KEY_LENGTH, SigningKey};
 use rand::RngCore as _;
 use shgen_config_native::Config;
 use shgen_key_utils::{matcher::Matcher, openssh::format::Formatter};
 use shgen_rand::Rng;
 use shgen_types::{OpenSSHPrivateKey, OpenSSHPublicKey};
-
-static STOP_WORKERS: AtomicBool = AtomicBool::new(false);
 
 pub fn generate(config: Config) {
     let mut keep_awake = if config.runtime.keep_awake {
@@ -22,33 +18,35 @@ pub fn generate(config: Config) {
         None
     };
 
-    let mut worker_handles = Vec::with_capacity(config.runtime.threads);
-    for thread_id in 0..config.runtime.threads {
-        let matcher = Matcher::new(config.shared.keywords.clone(), config.shared.search.clone());
-
-        worker_handles.push(
-            std::thread::Builder::new()
-                .name(format!("worker-{thread_id}"))
-                .spawn(move || worker(&matcher))
-                .expect("failed to spawn worker thread"),
-        );
-    }
-
     if let Some(ref mut keep_awake) = keep_awake
         && let Err(error) = keep_awake.prevent_sleep()
     {
         eprintln!("Failed to prevent system sleep: {error}");
     }
 
-    let mut found_key: Option<(OpenSSHPublicKey, OpenSSHPrivateKey)> = None;
-    for handle in worker_handles {
-        if let Ok(Some(key_pair)) = handle.join()
-            && found_key.is_none()
-        {
-            found_key = Some(key_pair);
-            STOP_WORKERS.store(true, Ordering::Release);
+    let matcher = Matcher::new(config.shared.keywords, config.shared.search);
+    let found_key = std::thread::scope(|scope| {
+        let mut worker_threads = Vec::with_capacity(config.runtime.threads);
+
+        for thread_id in 0..config.runtime.threads {
+            let matcher = &matcher;
+
+            worker_threads.push(
+                std::thread::Builder::new()
+                    .name(format!("shgen-worker-{thread_id}"))
+                    .spawn_scoped(scope, move || worker(&matcher))
+                    .expect("failed to spawn worker thread"),
+            );
         }
-    }
+
+        for thread in worker_threads {
+            if let Ok(Some(key_pair)) = thread.join() {
+                return Some(key_pair);
+            }
+        }
+
+        None
+    });
 
     if let Some((public_key, private_key)) = found_key {
         config.output.save_keys(&public_key, &private_key);
@@ -56,13 +54,13 @@ pub fn generate(config: Config) {
 }
 
 fn worker(matcher: &Matcher) -> Option<(OpenSSHPublicKey, OpenSSHPrivateKey)> {
-    const BATCH_COUNT: usize = (8 * 1024) / SECRET_KEY_LENGTH;
+    const BATCH_SIZE: usize = 8 * (SECRET_KEY_LENGTH * 32);
 
     let mut rng = Rng::from_best_available();
     let mut formatter = Formatter::empty();
 
-    let mut secret_keys_batch = [0u8; SECRET_KEY_LENGTH * BATCH_COUNT];
-    while !STOP_WORKERS.load(Ordering::Acquire) {
+    let mut secret_keys_batch = [0u8; BATCH_SIZE];
+    loop {
         rng.fill_bytes(&mut secret_keys_batch);
 
         let (secret_keys_chunks, _) = secret_keys_batch.as_chunks::<SECRET_KEY_LENGTH>();
@@ -73,11 +71,8 @@ fn worker(matcher: &Matcher) -> Option<(OpenSSHPublicKey, OpenSSHPrivateKey)> {
             if let Some((public_key, private_key)) =
                 matcher.search_matches(&mut formatter, &mut rng)
             {
-                STOP_WORKERS.store(true, Ordering::Release);
                 return Some((public_key, private_key));
             }
         }
     }
-
-    None
 }
