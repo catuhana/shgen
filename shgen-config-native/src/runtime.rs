@@ -3,7 +3,6 @@
 pub struct Config {
     pub threads: usize,
     pub keep_awake: bool,
-    pub pin_threads: bool,
 }
 
 impl Default for Config {
@@ -13,7 +12,6 @@ impl Default for Config {
                 .map(std::num::NonZeroUsize::get)
                 .unwrap_or(1),
             keep_awake: true,
-            pin_threads: true,
         }
     }
 }

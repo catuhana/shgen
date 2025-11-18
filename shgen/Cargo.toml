@@ -6,7 +6,6 @@ edition.workspace = true
 [dependencies]
 ed25519-dalek.workspace = true
 mimalloc = "0.1.48"
-gdt-cpus = "25.5.0"
 rand.workspace = true
 shgen-config-native = { path = "../shgen-config-native", features = ["fs"] }
 shgen-types = { path = "../shgen-types" }

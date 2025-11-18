@@ -29,15 +29,7 @@ pub fn generate(config: Config) {
         worker_handles.push(
             std::thread::Builder::new()
                 .name(format!("worker-{thread_id}"))
-                .spawn(move || {
-                    if config.runtime.pin_threads {
-                        gdt_cpus::pin_thread_to_core(thread_id).unwrap_or_else(|e| {
-                            eprintln!("Failed to set core affinity for thread {thread_id}: {e}");
-                        });
-                    }
-
-                    worker(&matcher)
-                })
+                .spawn(move || worker(&matcher))
                 .expect("failed to spawn worker thread"),
         );
     }

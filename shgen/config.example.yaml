@@ -67,12 +67,6 @@ runtime:
   # Default: true
   keep-awake: true
 
-  # Pin key generation threads to specific CPU cores.
-  # Can improve performance on some systems.
-  #
-  # Default: true
-  pin-threads: true
-
   # TODO: Add `use-physical-cores` option to use only physical cores.
 
 output:
