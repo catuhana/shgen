@@ -1,3 +1,5 @@
+use std::thread;
+
 use ed25519_dalek::{SECRET_KEY_LENGTH, SigningKey};
 use rand::RngCore as _;
 use shgen_config_native::Config;
@@ -25,16 +27,16 @@ pub fn generate(config: Config) {
     }
 
     let matcher = Matcher::new(config.shared.keywords, config.shared.search);
-    let found_key = std::thread::scope(|scope| {
+    let found_key = thread::scope(|scope| {
         let mut worker_threads = Vec::with_capacity(config.runtime.threads);
 
         for thread_id in 0..config.runtime.threads {
             let matcher = &matcher;
 
             worker_threads.push(
-                std::thread::Builder::new()
+                thread::Builder::new()
                     .name(format!("shgen-worker-{thread_id}"))
-                    .spawn_scoped(scope, move || worker(&matcher))
+                    .spawn_scoped(scope, move || worker(matcher))
                     .expect("failed to spawn worker thread"),
             );
         }

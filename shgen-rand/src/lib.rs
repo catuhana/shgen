@@ -2,6 +2,7 @@ use rand::{RngCore, SeedableRng as _};
 use rand_aes::Aes128Ctr64;
 use rand_chacha::ChaCha8Rng;
 
+#[allow(clippy::large_enum_variant)]
 pub enum Rng {
     Aes128Ctr64(Aes128Ctr64),
     // https://eprint.iacr.org/2019/1492.pdf Section 5.3
